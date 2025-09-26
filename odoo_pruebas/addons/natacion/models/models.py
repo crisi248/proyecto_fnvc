@@ -27,13 +27,41 @@ class swimmer(models.Model):
     yearOfBirth = fields.Char()
     age = fields.Integer()
     category_id = fields.Many2one("natacion.category", ondelete="set null")
-    bestTime = fields.Float(related='style.bestTime')
+    bestTime = fields.Float()
+    bestStyle = fields.One2many("natacion.style", "bestSwimmers")
 
 class style(models.Model):
-    _name = "natacion.swimmer"
+    _name = "natacion.style"
     _description = "Nadador"
 
     name = fields.Char(required=True)
+    bestSwimmers = fields.Many2one("natacion.swimmer", ondelete="set null")
+    
+class championship(models.Model):
+    _name = "natacion.championship"
+    _description = "Nadador"
+
+    name = fields.Char(required=True)
+    date = fields.Datetime( string='Start Date')
+
+class session(models.Model):
+    _name = "natacion.session"
+    _description = "Sesión de natación"
+
+    name = fields.Char(required=True)
+
+class test(models.Model):
+    _name = "natacion.test"
+    _description = "Test de natación"
+
+    name = fields.Char(required=True)
+
+class set(models.Model):
+    _name = "natacion.set"
+    _description = "Serie de natación"
+
+    name = fields.Char(required=True)
+
 
 
 
