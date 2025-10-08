@@ -1,0 +1,12 @@
+<odoo>
+  <data>
+    <record model="ir.actions.act_window" id="natacion.action_sessions_window">
+      <field name="name">natacion Session window</field>
+      <field name="res_model">natacion.session</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem name="Sessions" id="natacion.menu_sessions" parent="natacion.menu_management"
+              action="natacion.action_sessions_window"/>
+  </data>
+</odoo>

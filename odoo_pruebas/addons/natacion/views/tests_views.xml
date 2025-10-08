@@ -1,0 +1,12 @@
+<odoo>
+  <data>
+    <record model="ir.actions.act_window" id="natacion.action_tests_window">
+      <field name="name">natacion Test window</field>
+      <field name="res_model">natacion.test</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem name="Tests" id="natacion.menu_tests" parent="natacion.menu_management"
+              action="natacion.action_tests_window"/>
+  </data>
+</odoo>

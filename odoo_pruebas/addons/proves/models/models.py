@@ -2,6 +2,13 @@
 
 from odoo import models, fields, api
 
+"""
+El nom del model mark ha de ser computat per indicar l’alumne i l’assignatura
+Fer un nou camp computat a partir de l’any de naixement per treure l’edat. 
+Treue la quantitat d’assignatures d’un alumne i d’un professor
+Fer que la nota per defecte al crear una nota en un alumne siga un número aleatori
+"""
+
 
 class student(models.Model):
     _name = 'proves.student'
@@ -13,6 +20,12 @@ class student(models.Model):
     classroom = fields.Many2one('proves.classroom', ondelete='set null')
     subject = fields.Many2many('proves.subject')
     floor = fields.Integer(related='classroom.floor')
+    age = fields.Integer(compute="_get_age")
+
+    @api.depends("year")
+    def _get_age(self):
+        for s in self:
+            s.age = int(fields.Date.to_string(fields.Date.today()).split('-')[0]) - s.year
 
 
 class teacher(models.Model):
@@ -32,10 +45,16 @@ class mark(models.Model):
     _name = 'proves.mark'
     _description = 'notas'
 
-    name = fields.Char()
+    name = fields.Char(compute="_nombre_alumno_asignatura", readonly=True)
     mark = fields.Integer()
     student = fields.Many2one('proves.student')
     subject = fields.Many2one('proves.subject')
+
+    @api.depends('student', 'subject')
+    def _nombre_alumno_asignatura(self):
+        for m in self:
+            m.name = str(m.student.name) + " " + str(m.subject.name)
+
 
 class subject(models.Model):
     _name = 'proves.subject'

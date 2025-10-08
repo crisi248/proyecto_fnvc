@@ -1,0 +1,12 @@
+<odoo>
+  <data>
+    <record model="ir.actions.act_window" id="natacion.action_categories_window">
+      <field name="name">natacion Category window</field>
+      <field name="res_model">natacion.category</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem name="Categories" id="natacion.menu_categories" parent="natacion.menu_management"
+              action="natacion.action_categories_window"/>
+  </data>
+</odoo>

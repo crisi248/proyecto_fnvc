@@ -1,19 +1,43 @@
 <odoo>
   <data>
     <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="proves.list">
+
+    <record model="ir.ui.view" id="proves.student_list">
       <field name="name">proves list</field>
-      <field name="model">proves.proves</field>
+      <field name="model">proves.student</field>
       <field name="arch" type="xml">
         <list>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
+          <field name="name" />
+          <field name="age" />
+          <field name="classroom" />
         </list>
       </field>
     </record>
--->
+
+    <record model="ir.ui.view" id="proves.student_form_view">
+      <field name="name">proves Students form</field>
+      <field name="model">proves.student</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="photo" widget="image" />
+              <field name="year" />
+              <field name="age" />
+            </group>
+            <notebook>
+              <page string="topics">
+                <group>
+                  <field name="classroom" />
+                  <field name="subject" />
+                </group>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
 
     <!-- actions opening views on models -->
 
@@ -43,22 +67,22 @@
 
     <!-- Top menu item -->
 
-    <menuitem name="school" id="proves.menu_root_school"/>
+    <menuitem name="school" id="proves.menu_root_school" />
 
     <!-- menu categories -->
 
-    <menuitem name="Management" id="proves.menu_management" parent="proves.menu_root_school"/>
+    <menuitem name="Management" id="proves.menu_management" parent="proves.menu_root_school" />
 
     <!-- actions -->
 
     <menuitem name="Students" id="proves.menu_students" parent="proves.menu_management"
-              action="proves.action_students_window"/>
+      action="proves.action_students_window" />
     <menuitem name="Teachers" id="proves.menu_teachers" parent="proves.menu_management"
-              action="proves.action_teachers_window"/>
+      action="proves.action_teachers_window" />
     <menuitem name="Subjects" id="proves.menu_subjects" parent="proves.menu_management"
-              action="proves.action_subjects_window"/>
+      action="proves.action_subjects_window" />
     <menuitem name="Classrooms" id="proves.menu_classroom" parent="proves.menu_management"
-              action="proves.action_classroom_window"/>
+      action="proves.action_classroom_window" />
 
   </data>
 </odoo>

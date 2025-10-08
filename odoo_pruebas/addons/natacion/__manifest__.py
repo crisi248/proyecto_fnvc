@@ -23,6 +23,14 @@ Long description of module's purpose
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'views/categories_views.xml',
+        'views/championships_views.xml',
+        'views/club_views.xml',
+        'views/sessions_views.xml',
+        'views/sets_views.xml',          
+        'views/styles_views.xml',
+        'views/swimmers_views.xml',
+        'views/tests_views.xml',      
         'views/views.xml',  
         'views/templates.xml',
     ],

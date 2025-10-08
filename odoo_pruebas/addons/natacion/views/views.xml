@@ -17,54 +17,6 @@
 
     <!-- actions opening views on models -->
 
-    <record model="ir.actions.act_window" id="natacion.action_clubs_window">
-      <field name="name">natacion Club window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_categories_window">
-      <field name="name">natacion Category window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_swimmers_window">
-      <field name="name">natacion Swimmer window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_styles_window">
-      <field name="name">natacion Style window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_championships_window">
-      <field name="name">natacion Championship window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_sessions_window">
-      <field name="name">natacion Session window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_tests_window">
-      <field name="name">natacion Test window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="natacion.action_sets_window">
-      <field name="name">natacion Set window</field>
-      <field name="res_model">natacion.club</field>
-      <field name="view_mode">list,form</field>
-    </record>
-
     <!-- Top menu item -->
 
     <menuitem name="natacion" id="natacion.menu_root_natacion"/>
@@ -74,23 +26,6 @@
     <menuitem name="Management" id="natacion.menu_management" parent="natacion.menu_root_natacion"/>
    
     <!-- actions -->
-
-    <menuitem name="Clubs" id="natacion.menu_clubs" parent="natacion.menu_management"
-              action="natacion.action_clubs_window"/>
-    <menuitem name="Categories" id="natacion.menu_categories" parent="natacion.menu_management"
-              action="natacion.action_categories_window"/>
-    <menuitem name="Swimmers" id="natacion.menu_swimmers" parent="natacion.menu_management"
-              action="natacion.action_swimmers_window"/>
-    <menuitem name="Styles" id="natacion.menu_styles" parent="natacion.menu_management"
-              action="natacion.action_styles_window"/>
-    <menuitem name="Championships" id="natacion.menu_championships" parent="natacion.menu_management"
-              action="natacion.action_championships_window"/>
-    <menuitem name="Sessions" id="natacion.menu_sessions" parent="natacion.menu_management"
-              action="natacion.action_sessions_window"/>
-    <menuitem name="Tests" id="natacion.menu_tests" parent="natacion.menu_management"
-              action="natacion.action_tests_window"/>
-    <menuitem name="Sets" id="natacion.menu_sets" parent="natacion.menu_management"
-              action="natacion.action_sets_window"/>           
 
   </data>
 </odoo>

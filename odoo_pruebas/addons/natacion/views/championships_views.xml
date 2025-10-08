@@ -1,0 +1,12 @@
+<odoo>
+  <data>
+    <record model="ir.actions.act_window" id="natacion.action_championships_window">
+      <field name="name">natacion Championship window</field>
+      <field name="res_model">natacion.championship</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem name="Championships" id="natacion.menu_championships" parent="natacion.menu_management"
+              action="natacion.action_championships_window"/>
+  </data>
+</odoo>

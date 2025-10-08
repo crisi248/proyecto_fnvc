@@ -1,0 +1,12 @@
+<odoo>
+  <data>
+    <record model="ir.actions.act_window" id="natacion.action_clubs_window">
+      <field name="name">natacion Club window</field>
+      <field name="res_model">natacion.club</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem name="Clubs" id="natacion.menu_clubs" parent="natacion.menu_management"
+              action="natacion.action_clubs_window"/>
+  </data>
+</odoo>
