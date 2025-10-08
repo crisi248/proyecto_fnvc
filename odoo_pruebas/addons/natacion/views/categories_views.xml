@@ -1,5 +1,55 @@
 <odoo>
   <data>
+
+    <!-- List view -->
+    <record id="view_category_list" model="ir.ui.view">
+      <field name="name">categories list</field>
+      <field name="model">natacion.category</field>
+      <field name="arch" type="xml">
+        <list string="Categories">
+          <field name="name" />
+          <field name="minAge" />
+          <field name="maxAge" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_category_form" model="ir.ui.view">
+      <field name="name">categories form</field>
+      <field name="model">natacion.category</field>
+      <field name="arch" type="xml">
+        <form string="Category">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="minAge" />
+              <field name="maxAge" />
+            </group>
+            <notebook>
+              <page string="Swimmers">
+                <field name="swimmers_list">
+                  <list>
+                    <field name="name" />
+                    <field name="age" />
+                    <field name="bestTime" />
+                  </list>
+                </field>
+              </page>
+              <page string="Tests">
+                <field name="tests">
+                  <list>
+                    <field name="name" />
+                    <field name="description" />
+                  </list>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_categories_window">
       <field name="name">natacion Category window</field>
       <field name="res_model">natacion.category</field>
@@ -7,6 +57,6 @@
     </record>
 
     <menuitem name="Categories" id="natacion.menu_categories" parent="natacion.menu_management"
-              action="natacion.action_categories_window"/>
+      action="natacion.action_categories_window" />
   </data>
 </odoo>

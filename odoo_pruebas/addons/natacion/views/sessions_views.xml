@@ -1,5 +1,49 @@
 <odoo>
   <data>
+
+    <!-- List view -->
+    <record id="view_session_list" model="ir.ui.view">
+      <field name="name">sessions list</field>
+      <field name="model">natacion.session</field>
+      <field name="arch" type="xml">
+        <list string="Sessions">
+          <field name="name" />
+          <field name="date" />
+          <field name="championship_id" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_session_form" model="ir.ui.view">
+      <field name="name">sessions form</field>
+      <field name="model">natacion.session</field>
+      <field name="arch" type="xml">
+        <form string="Session">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="date" />
+              <field name="championship_id" />
+            </group>
+            <notebook>
+              <page string="Tests">
+                <field name="tests">
+                  <list>
+                    <field name="name" />
+                    <field name="description" />
+                  </list>
+                </field>
+              </page>
+              <page string="Swimmers">
+                <field name="swimmers" widget="many2many_tags" />
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_sessions_window">
       <field name="name">natacion Session window</field>
       <field name="res_model">natacion.session</field>
@@ -7,6 +51,6 @@
     </record>
 
     <menuitem name="Sessions" id="natacion.menu_sessions" parent="natacion.menu_management"
-              action="natacion.action_sessions_window"/>
+      action="natacion.action_sessions_window" />
   </data>
 </odoo>

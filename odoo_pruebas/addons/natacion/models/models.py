@@ -26,13 +26,18 @@ class swimmer(models.Model):
     _description = "Nadador"
 
     name = fields.Char(required=True)
-    yearOfBirth = fields.Char()
-    age = fields.Integer()
+    yearOfBirth = fields.Integer()
+    age = fields.Integer(compute="_get_age")
     category_id = fields.Many2one("natacion.category", ondelete="set null")
     bestTime = fields.Float()
     bestStyle = fields.One2many("natacion.style", "bestSwimmers")
     sessions = fields.Many2many("natacion.session")
     tests = fields.Many2many("natacion.test")
+
+    @api.depends("yearOfBirth")
+    def _get_age(self):
+        for s in self:
+            s.age = int(fields.Date.to_string(fields.Date.today()).split('-')[0]) - s.yearOfBirth
 
 class style(models.Model):
     _name = "natacion.style"
@@ -73,7 +78,7 @@ class test(models.Model):
     category_id = fields.Many2one("natacion.category", ondelete="set null")
     swimmers = fields.Many2many("natacion.swimmer")
     sets = fields.One2many("natacion.set", "test_id")
-    session_id = fields.Many2one("natacion.sesion", ondelete="set null")
+    session_id = fields.Many2one("natacion.session", ondelete="set null")
 
 class set(models.Model):
     _name = "natacion.set"

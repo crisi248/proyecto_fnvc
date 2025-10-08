@@ -1,5 +1,52 @@
 <odoo>
   <data>
+
+    <!-- List view -->
+    <record id="view_test_list" model="ir.ui.view">
+      <field name="name">tests list</field>
+      <field name="model">natacion.test</field>
+      <field name="arch" type="xml">
+        <list string="Tests">
+          <field name="name" />
+          <field name="description" />
+          <field name="style_id" />
+          <field name="category_id" />
+          <field name="session_id" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_test_form" model="ir.ui.view">
+      <field name="name">tests form</field>
+      <field name="model">natacion.test</field>
+      <field name="arch" type="xml">
+        <form string="Test">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="description" />
+              <field name="style_id" />
+              <field name="category_id" />
+              <field name="session_id" />
+            </group>
+            <group>
+              <field name="swimmers" widget="many2many_tags" />
+            </group>
+            <notebook>
+              <page string="Sets">
+                <field name="sets">
+                  <list>
+                    <field name="name" />
+                  </list>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_tests_window">
       <field name="name">natacion Test window</field>
       <field name="res_model">natacion.test</field>
@@ -7,6 +54,6 @@
     </record>
 
     <menuitem name="Tests" id="natacion.menu_tests" parent="natacion.menu_management"
-              action="natacion.action_tests_window"/>
+      action="natacion.action_tests_window" />
   </data>
 </odoo>

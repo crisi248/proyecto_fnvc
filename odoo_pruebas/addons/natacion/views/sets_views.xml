@@ -1,5 +1,34 @@
 <odoo>
   <data>
+
+    <!-- List view -->
+    <record id="view_set_list" model="ir.ui.view">
+      <field name="name">sets list</field>
+      <field name="model">natacion.set</field>
+      <field name="arch" type="xml">
+        <list string="Sets">
+          <field name="name" />
+          <field name="test_id" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_set_form" model="ir.ui.view">
+      <field name="name">sets form</field>
+      <field name="model">natacion.set</field>
+      <field name="arch" type="xml">
+        <form string="Set">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="test_id" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_sets_window">
       <field name="name">natacion Set window</field>
       <field name="res_model">natacion.set</field>
@@ -7,6 +36,6 @@
     </record>
 
     <menuitem name="Sets" id="natacion.menu_sets" parent="natacion.menu_management"
-              action="natacion.action_sets_window"/>
+      action="natacion.action_sets_window" />
   </data>
 </odoo>

@@ -1,5 +1,42 @@
 <odoo>
   <data>
+
+    <!-- List view -->
+    <record id="view_style_list" model="ir.ui.view">
+      <field name="name">styles list</field>
+      <field name="model">natacion.style</field>
+      <field name="arch" type="xml">
+        <list string="Styles">
+          <field name="name" />
+          <field name="bestSwimmers" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_style_form" model="ir.ui.view">
+      <field name="name">styles form</field>
+      <field name="model">natacion.style</field>
+      <field name="arch" type="xml">
+        <form string="Style">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="bestSwimmers" />
+            </group>
+            <group>
+              <field name="tests">
+                <list>
+                  <field name="name" />
+                  <field name="description" />
+                </list>
+              </field>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_styles_window">
       <field name="name">natacion Style window</field>
       <field name="res_model">natacion.style</field>
@@ -7,6 +44,6 @@
     </record>
 
     <menuitem name="Styles" id="natacion.menu_styles" parent="natacion.menu_management"
-              action="natacion.action_styles_window"/>
+      action="natacion.action_styles_window" />
   </data>
 </odoo>

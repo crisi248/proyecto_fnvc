@@ -1,5 +1,37 @@
 <odoo>
   <data>
+    <!-- List view -->
+    <record id="view_club_list" model="ir.ui.view">
+      <field name="name">clubs list</field>
+      <field name="model">natacion.club</field>
+      <field name="arch" type="xml">
+        <list string="Clubs">
+          <field name="name" />
+          <field name="town" />
+          <field name="partner" />
+          <field name="championships" widget="many2many_tags" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_club_form" model="ir.ui.view">
+      <field name="name">clubs form</field>
+      <field name="model">natacion.club</field>
+      <field name="arch" type="xml">
+        <form string="Club">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="town" />
+              <field name="partner" />
+              <field name="championships" widget="many2many_tags" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_clubs_window">
       <field name="name">natacion Club window</field>
       <field name="res_model">natacion.club</field>
@@ -7,6 +39,7 @@
     </record>
 
     <menuitem name="Clubs" id="natacion.menu_clubs" parent="natacion.menu_management"
-              action="natacion.action_clubs_window"/>
+      action="natacion.action_clubs_window" />
+
   </data>
 </odoo>

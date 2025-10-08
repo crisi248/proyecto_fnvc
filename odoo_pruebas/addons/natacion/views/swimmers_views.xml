@@ -1,5 +1,51 @@
 <odoo>
   <data>
+
+    <!-- List view -->
+    <record id="view_swimmer_list" model="ir.ui.view">
+      <field name="name">swimmers list</field>
+      <field name="model">natacion.swimmer</field>
+      <field name="arch" type="xml">
+        <list string="Swimmers">
+          <field name="name" />
+          <field name="yearOfBirth" />
+          <field name="age" />
+          <field name="category_id" />
+          <field name="bestTime" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_swimmer_form" model="ir.ui.view">
+      <field name="name">swimmers form</field>
+      <field name="model">natacion.swimmer</field>
+      <field name="arch" type="xml">
+        <form string="Swimmer">
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="yearOfBirth" />
+              <field name="age" />
+              <field name="category_id" />
+              <field name="bestTime" />
+            </group>
+            <group>
+              <field name="bestStyle" widget="one2many_list">
+                <list>
+                  <field name="name" />
+                </list>
+              </field>
+            </group>
+            <group>
+              <field name="sessions" widget="many2many_tags" />
+              <field name="tests" widget="many2many_tags" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.actions.act_window" id="natacion.action_swimmers_window">
       <field name="name">natacion Swimmer window</field>
       <field name="res_model">natacion.swimmer</field>
@@ -7,6 +53,6 @@
     </record>
 
     <menuitem name="Swimmers" id="natacion.menu_swimmers" parent="natacion.menu_management"
-              action="natacion.action_swimmers_window"/>
+      action="natacion.action_swimmers_window" />
   </data>
 </odoo>
