@@ -12,6 +12,7 @@
           <field name="age" />
           <field name="category_id" />
           <field name="bestTime" />
+          <field name="club" widget="many2one_tags" />
         </list>
       </field>
     </record>
@@ -29,6 +30,7 @@
               <field name="age" />
               <field name="category_id" />
               <field name="bestTime" />
+              <field name="club" widget="many2one_tags" />
             </group>
             <group>
               <field name="bestStyle" widget="one2many_list">

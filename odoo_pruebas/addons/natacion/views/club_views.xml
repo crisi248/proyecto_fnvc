@@ -8,8 +8,8 @@
         <list string="Clubs">
           <field name="name" />
           <field name="town" />
-          <field name="partner" />
           <field name="championships" widget="many2many_tags" />
+          <field name="swimmers_list" widget="one2many_tags" />
         </list>
       </field>
     </record>
@@ -24,8 +24,8 @@
             <group>
               <field name="name" />
               <field name="town" />
-              <field name="partner" />
               <field name="championships" widget="many2many_tags" />
+              <field name="swimmers_list" widget="one2many_tags" />
             </group>
           </sheet>
         </form>

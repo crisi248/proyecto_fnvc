@@ -33,9 +33,15 @@ Long description of module's purpose
         'views/tests_views.xml',      
         'views/views.xml',  
         'views/templates.xml',
+        'demo/categories.xml',
+        'demo/clubs.xml',
+        'demo/swimmers.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
+        'demo/categories.xml',
+        'demo/clubs.xml',
+        'demo/swimmers.xml',
         'demo/demo.xml',
     ],
 }

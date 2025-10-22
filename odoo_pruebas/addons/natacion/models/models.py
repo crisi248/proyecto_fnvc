@@ -8,8 +8,9 @@ class club(models.Model):
 
     name = fields.Char(required=True)
     town = fields.Char()
-    partner = fields.Char()
+    swimmers_list = fields.One2many("natacion.swimmer", "club")
     championships = fields.Many2many("natacion.championship")
+
 
 class category(models.Model):
     _name = "natacion.category"
@@ -26,6 +27,8 @@ class swimmer(models.Model):
     _description = "Nadador"
 
     name = fields.Char(required=True)
+    image = fields.Image()
+    club = fields.Many2one("natacion.club", ondelete="set null")
     yearOfBirth = fields.Integer()
     age = fields.Integer(compute="_get_age")
     category_id = fields.Many2one("natacion.category", ondelete="set null")
@@ -33,6 +36,7 @@ class swimmer(models.Model):
     bestStyle = fields.One2many("natacion.style", "bestSwimmers")
     sessions = fields.Many2many("natacion.session")
     tests = fields.Many2many("natacion.test")
+    championship = fields.Many2many("natacion.championship")
 
     @api.depends("yearOfBirth")
     def _get_age(self):
@@ -54,10 +58,17 @@ class championship(models.Model):
     name = fields.Char(required=True)
     clubs = fields.Many2many("natacion.club")
     # Nadadores inscritos de un club que esta inscrito
+    swimmers = fields.Many2many("natacion.swimmer", readonly=True, compute="_compute_swimmers")
     start_date = fields.Datetime()
     end_date = fields.Datetime()
     sessions = fields.One2many("natacion.session", "championship_id")
 
+    @api.depends("clubs", "clubs.swimmers_list")
+    def _compute_swimmers(self):
+        for record in self:
+            all_swimmers = record.clubs.mapped("swimmers_list")
+            record.swimmers = all_swimmers
+            
 class session(models.Model):
     _name = "natacion.session"
     _description = "Sesión de natación"
