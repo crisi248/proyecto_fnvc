@@ -1,10 +1,23 @@
 <odoo>
   <data>
 
+    <!-- Search view -->
+
+    <record id="view_swimmer_search" model="ir.ui.view">
+      <field name="name">swimmers search</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <search string="Swimmers">
+          <field name="name"/>
+          <filter name="is_swimmer" string="Is Swimmer" domain="[('is_swimmer', '=', True)]"/>
+        </search>
+      </field>
+    </record>
+
     <!-- List view -->
     <record id="view_swimmer_list" model="ir.ui.view">
       <field name="name">swimmers list</field>
-      <field name="model">natacion.swimmer</field>
+      <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <list string="Swimmers">
           <field name="name" />
@@ -20,17 +33,20 @@
     <!-- Form view -->
     <record id="view_swimmer_form" model="ir.ui.view">
       <field name="name">swimmers form</field>
-      <field name="model">natacion.swimmer</field>
+      <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <form string="Swimmer">
           <sheet>
             <group>
               <field name="name" />
+              <field name="image" widget="image" />
               <field name="yearOfBirth" />
               <field name="age" />
               <field name="category_id" />
               <field name="bestTime" />
               <field name="club" widget="many2one_tags" />
+              <field name="is_swimmer"/>
+
             </group>
             <group>
               <field name="bestStyle" widget="one2many_list">
@@ -49,8 +65,13 @@
     </record>
 
     <record model="ir.actions.act_window" id="natacion.action_swimmers_window">
+      <field name="context">{'default_is_swimmer': True, 'search_default_is_swimmer': 1}</field>
+      <field name="search_view_id" ref="natacion.view_swimmer_search"/>
+      <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('natacion.view_swimmer_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('natacion.view_swimmer_form')}),]" />
       <field name="name">natacion Swimmer window</field>
-      <field name="res_model">natacion.swimmer</field>
+      <field name="res_model">res.partner</field>
       <field name="view_mode">list,form</field>
     </record>
 

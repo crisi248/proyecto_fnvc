@@ -8,7 +8,7 @@ class club(models.Model):
 
     name = fields.Char(required=True)
     town = fields.Char()
-    swimmers_list = fields.One2many("natacion.swimmer", "club")
+    swimmers_list = fields.One2many("res.partner", "club")
     championships = fields.Many2many("natacion.championship")
 
 
@@ -19,14 +19,16 @@ class category(models.Model):
     name = fields.Char(required=True)
     minAge = fields.Integer()
     maxAge = fields.Integer()
-    swimmers_list = fields.One2many("natacion.swimmer", "category_id")
+    swimmers_list = fields.One2many("res.partner", "category_id")
     tests = fields.One2many("natacion.test", "category_id")
 
 class swimmer(models.Model):
-    _name = "natacion.swimmer"
-    _description = "Nadador"
+    #_name = "natacion.swimmer"
+    #_description = "Nadador"
+    _inherit = "res.partner"
 
-    name = fields.Char(required=True)
+    #name = fields.Char(required=True)
+    is_swimmer = fields.Boolean()
     image = fields.Image()
     club = fields.Many2one("natacion.club", ondelete="set null")
     yearOfBirth = fields.Integer()
@@ -48,7 +50,7 @@ class style(models.Model):
     _description = "Estilo de natación"
 
     name = fields.Char(required=True)
-    bestSwimmers = fields.Many2one("natacion.swimmer", ondelete="set null")
+    bestSwimmers = fields.Many2one("res.partner", ondelete="set null")
     tests = fields.One2many("natacion.test", "style_id")
     
 class championship(models.Model):
@@ -58,7 +60,7 @@ class championship(models.Model):
     name = fields.Char(required=True)
     clubs = fields.Many2many("natacion.club")
     # Nadadores inscritos de un club que esta inscrito
-    swimmers = fields.Many2many("natacion.swimmer", readonly=True, compute="_compute_swimmers")
+    swimmers = fields.Many2many("res.partner", readonly=True, compute="_compute_swimmers")
     start_date = fields.Datetime()
     end_date = fields.Datetime()
     sessions = fields.One2many("natacion.session", "championship_id")
@@ -77,7 +79,7 @@ class session(models.Model):
     date = fields.Datetime()
     championship_id = fields.Many2one("natacion.championship", ondelete="set null")
     tests = fields.One2many("natacion.test", "session_id")
-    swimmers = fields.Many2many("natacion.swimmer")
+    swimmers = fields.Many2many("res.partner")
 
 class test(models.Model):
     _name = "natacion.test"
@@ -87,7 +89,7 @@ class test(models.Model):
     description = fields.Char(required=True)
     style_id = fields.Many2one("natacion.style", ondelete="set null")
     category_id = fields.Many2one("natacion.category", ondelete="set null")
-    swimmers = fields.Many2many("natacion.swimmer")
+    swimmers = fields.Many2many("res.partner")
     sets = fields.One2many("natacion.set", "test_id")
     session_id = fields.Many2one("natacion.session", ondelete="set null")
 

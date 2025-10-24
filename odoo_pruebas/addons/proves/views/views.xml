@@ -2,9 +2,23 @@
   <data>
     <!-- explicit list view definition -->
 
+    <record model="ir.ui.view" id="proves.student_search">
+      <field name="name">proves list</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="name" />
+          <field name="age" />
+          <field name="classroom" />
+          <filter name="is_student" string="Is Student" domain="[('is_student', '=', 'True')]"/>
+          <filter name="group_by_student" string="Student" context="{'group_by': 'is_student'}"/>
+        </search>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="proves.student_list">
       <field name="name">proves list</field>
-      <field name="model">proves.student</field>
+      <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <list>
           <field name="name" />
@@ -16,7 +30,7 @@
 
     <record model="ir.ui.view" id="proves.student_form_view">
       <field name="name">proves Students form</field>
-      <field name="model">proves.student</field>
+      <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <form>
           <sheet>
@@ -43,8 +57,9 @@
 
     <record model="ir.actions.act_window" id="proves.action_students_window">
       <field name="name">proves Student window</field>
-      <field name="res_model">proves.student</field>
+      <field name="res_model">res.partner</field>
       <field name="view_mode">list,form</field>
+      <field name="context">{'default_is_student': True, 'search_default_is_student': 1}</field>
     </record>
 
     <record model="ir.actions.act_window" id="proves.action_teachers_window">

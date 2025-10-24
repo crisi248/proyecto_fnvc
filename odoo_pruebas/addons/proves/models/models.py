@@ -11,10 +11,11 @@ Fer que la nota per defecte al crear una nota en un alumne siga un número aleat
 
 
 class student(models.Model):
-    _name = 'proves.student'
-    _description = 'Estudiantes'
+    #_name = 'proves.student'
+    #_description = 'Estudiantes'
+    _inherit = "res.partner"
 
-    name = fields.Char(required=True)
+    #name = fields.Char(required=True)
     year = fields.Integer()
     photo = fields.Image(max_width=200, max_height=200)
     classroom = fields.Many2one('proves.classroom', ondelete='set null')
@@ -47,7 +48,7 @@ class mark(models.Model):
 
     name = fields.Char(compute="_nombre_alumno_asignatura", readonly=True)
     mark = fields.Integer()
-    student = fields.Many2one('proves.student')
+    student = fields.Many2one('res.partner')
     subject = fields.Many2one('proves.subject')
 
     @api.depends('student', 'subject')
@@ -71,7 +72,7 @@ class classroom(models.Model):
 
     name = fields.Char(required=True)
     floor = fields.Integer()
-    student_list = fields.One2many('proves.student', 'classroom')
+    student_list = fields.One2many('res.partner', 'classroom')
     teacher = fields.Many2many('proves.teacher')
     tutores = fields.Many2many(comodel_name='proves.teacher', # El model en el que es relaciona
                             relation='teacher_tutor_classroom', # (opcional) el nom del la taula en mig
