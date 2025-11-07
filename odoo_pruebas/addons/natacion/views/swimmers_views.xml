@@ -2,14 +2,13 @@
   <data>
 
     <!-- Search view -->
-
     <record id="view_swimmer_search" model="ir.ui.view">
       <field name="name">swimmers search</field>
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <search string="Swimmers">
-          <field name="name"/>
-          <filter name="is_swimmer" string="Is Swimmer" domain="[('is_swimmer', '=', True)]"/>
+          <field name="name" />
+          <filter name="is_swimmer" string="Is Swimmer" domain="[('is_swimmer', '=', True)]" />
         </search>
       </field>
     </record>
@@ -30,6 +29,50 @@
       </field>
     </record>
 
+    <!-- Kanban view -->
+    <record id="view_swimmer_kanban" model="ir.ui.view">
+      <field name="name">swimmers kanban</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <kanban>
+          <field name="name" />
+          <field name="image" />
+          <field name="age" />
+          <field name="bestTime" />
+          <field name="category_id" />
+          <field name="club" />
+
+          <templates>
+            <t t-name="kanban-box">
+              <div style="display:flex; align-items:center; padding:8px;">
+                <div>
+                  <img t-att-src="kanban_image('res.partner', 'image', record.id.value)"
+                    t-att-alt="record.name.value"
+                    style="width:64px; height:64px; margin-right:8px; border-radius:4px; object-fit:cover;" />
+                </div>
+                <div>
+                  <strong>
+                    <field name="name" />
+                  </strong>
+                  <br />
+                  <span>
+                    <field name="category_id" />
+                  </span>
+                  <br />
+                  <span>Edad: <field name="age" /></span>
+                  <br />
+                  <span>Mejor tiempo: <field name="bestTime" /></span>
+                  <br />
+                  <span>Club: <field name="club" /></span>
+                </div>
+              </div>
+            </t>
+          </templates>
+        </kanban>
+      </field>
+    </record>
+
+
     <!-- Form view -->
     <record id="view_swimmer_form" model="ir.ui.view">
       <field name="name">swimmers form</field>
@@ -45,8 +88,7 @@
               <field name="category_id" />
               <field name="bestTime" />
               <field name="club" widget="many2one_tags" />
-              <field name="is_swimmer"/>
-
+              <field name="is_swimmer" />
             </group>
             <group>
               <field name="bestStyle" widget="one2many_list">
@@ -64,18 +106,23 @@
       </field>
     </record>
 
+    <!-- Action -->
     <record model="ir.actions.act_window" id="natacion.action_swimmers_window">
       <field name="context">{'default_is_swimmer': True, 'search_default_is_swimmer': 1}</field>
-      <field name="search_view_id" ref="natacion.view_swimmer_search"/>
-      <field name="view_ids" eval="[(5, 0, 0),
+      <field name="search_view_id" ref="natacion.view_swimmer_search" />
+      <field name="view_ids"
+        eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('natacion.view_swimmer_kanban')}),
             (0, 0, {'view_mode': 'list', 'view_id': ref('natacion.view_swimmer_list')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('natacion.view_swimmer_form')}),]" />
       <field name="name">natacion Swimmer window</field>
       <field name="res_model">res.partner</field>
-      <field name="view_mode">list,form</field>
+      <field name="view_mode">kanban,list,form</field>
     </record>
 
+    <!-- Menu -->
     <menuitem name="Swimmers" id="natacion.menu_swimmers" parent="natacion.menu_management"
       action="natacion.action_swimmers_window" />
+
   </data>
 </odoo>
