@@ -2,14 +2,20 @@
 
 from odoo import models, fields, api
 
-class club(models.Model):
+class Club(models.Model):
     _name = "natacion.club"
     _description = "Club de natación"
 
     name = fields.Char(required=True)
     town = fields.Char()
-    swimmers_list = fields.One2many("res.partner", "club")
+    image = fields.Image()
+    swimmers_list = fields.One2many(
+        "res.partner",
+        "club",  # campo inverso en res.partner
+        string="Nadadores"
+    )
     championships = fields.Many2many("natacion.championship")
+
 
 
 class category(models.Model):
