@@ -55,6 +55,7 @@ class mark(models.Model):
     def _nombre_alumno_asignatura(self):
         for m in self:
             m.name = str(m.student.name) + " " + str(m.subject.name)
+    
 
 
 class subject(models.Model):

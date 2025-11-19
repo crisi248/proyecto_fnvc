@@ -22,7 +22,7 @@
           <field name="name" />
           <field name="yearOfBirth" />
           <field name="age" />
-          <field name="category_id" />
+          <field name="category" />
           <field name="bestTime" />
           <field name="club" widget="many2one_tags" />
         </list>
@@ -39,7 +39,7 @@
           <field name="image" />
           <field name="age" />
           <field name="bestTime" />
-          <field name="category_id" />
+          <field name="category" />
           <field name="club" />
 
           <templates>
@@ -56,7 +56,7 @@
                   </strong>
                   <br />
                   <span>
-                    <field name="category_id" />
+                    <field name="category" />
                   </span>
                   <br />
                   <span>Edad: <field name="age" /></span>
@@ -84,7 +84,7 @@
               <field name="image" widget="image" />
               <field name="yearOfBirth" />
               <field name="age" />
-              <field name="category_id" />
+              <field name="category" />
               <field name="bestTime" />
               <field name="club" widget="many2one_tags" />
               <field name="is_swimmer" />
@@ -99,6 +99,7 @@
             <group>
               <field name="sessions" widget="many2many_tags" />
               <field name="tests" widget="many2many_tags" />
+              <button name="formulario_completo" type="object" string= "Cambiar a formulario completo"/>
             </group>
           </sheet>
         </form>

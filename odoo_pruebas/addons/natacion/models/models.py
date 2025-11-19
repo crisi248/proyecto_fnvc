@@ -25,7 +25,7 @@ class category(models.Model):
     name = fields.Char(required=True)
     minAge = fields.Integer()
     maxAge = fields.Integer()
-    swimmers_list = fields.One2many("res.partner", "category_id")
+    swimmers_list = fields.One2many("res.partner", "category")
     tests = fields.One2many("natacion.test", "category_id")
 
 class swimmer(models.Model):
@@ -39,7 +39,7 @@ class swimmer(models.Model):
     club = fields.Many2one("natacion.club", ondelete="set null")
     yearOfBirth = fields.Integer()
     age = fields.Integer(compute="_get_age")
-    category_id = fields.Many2one("natacion.category", ondelete="set null")
+    category = fields.Many2one("natacion.category", ondelete="set null")
     bestTime = fields.Float()
     bestStyle = fields.One2many("natacion.style", "bestSwimmers")
     sessions = fields.Many2many("natacion.session")
@@ -50,6 +50,17 @@ class swimmer(models.Model):
     def _get_age(self):
         for s in self:
             s.age = int(fields.Date.to_string(fields.Date.today()).split('-')[0]) - s.yearOfBirth
+    
+    def formulario_completo(self):
+        return {
+            "name" : "Swimmer",
+            "view_type" : "form",
+            "view_mode" : "form",
+            "res_model" : "res.partner",
+            "res_id" : self.id,
+            "type" : "ir.actions.act_window",
+            "target" : "current",
+        }
 
 class style(models.Model):
     _name = "natacion.style"
