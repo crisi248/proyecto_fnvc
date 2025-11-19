@@ -100,6 +100,7 @@
               <field name="sessions" widget="many2many_tags" />
               <field name="tests" widget="many2many_tags" />
               <button name="formulario_completo" type="object" string= "Cambiar a formulario completo"/>
+              <button name="pagar_cuota" type="object" string= "Pagar cuota anual"/>
             </group>
           </sheet>
         </form>

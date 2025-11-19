@@ -46,6 +46,7 @@ class swimmer(models.Model):
     tests = fields.Many2many("natacion.test")
     championship = fields.Many2many("natacion.championship")
 
+
     @api.depends("yearOfBirth")
     def _get_age(self):
         for s in self:
@@ -61,6 +62,23 @@ class swimmer(models.Model):
             "type" : "ir.actions.act_window",
             "target" : "current",
         }
+    
+    def pagar_cuota(self):
+
+        product = self.env.ref("natacion.product_cuota_anual")
+
+        order = self.env["sale.order"].create({
+            "partner_id": self.id,
+        })
+
+        self.env["sale.order.line"].create({
+        "order_id": order.id,
+        "product_id": product.id,
+        })
+
+        return order.get_formview_action()
+    
+    
 
 class style(models.Model):
     _name = "natacion.style"
