@@ -11,7 +11,7 @@ class Club(models.Model):
     image = fields.Image()
     swimmers_list = fields.One2many(
         "res.partner",
-        "club",  # campo inverso en res.partner
+        "club", 
         string="Nadadores"
     )
     championships = fields.Many2many("natacion.championship")
@@ -27,6 +27,8 @@ class category(models.Model):
     maxAge = fields.Integer()
     swimmers_list = fields.One2many("res.partner", "category")
     tests = fields.One2many("natacion.test", "category_id")
+
+
 
 class swimmer(models.Model):
     #_name = "natacion.swimmer"
@@ -45,6 +47,28 @@ class swimmer(models.Model):
     sessions = fields.Many2many("natacion.session")
     tests = fields.Many2many("natacion.test")
     championship = fields.Many2many("natacion.championship")
+    membership_end_date = fields.Date(readonly=True)
+    membership_progress = fields.Integer(compute="_compute_service_progress")
+
+    def _compute_service_progress(self):
+        for s in self:
+            if not s.membership_end_date:
+                s.membership_progress = 0
+                continue
+
+            today = fields.Date.from_string(fields.Date.today())
+            end = fields.Date.from_string(s.membership_end_date)
+
+            start = end.replace(year=end.year - 1)
+
+            if today >= end:
+                s.membership_progress = 100
+                continue
+
+            total = (end - start).days or 1
+            used = (today - start).days
+
+            s.membership_progress = min(100, max(0, int((used / total) * 100)))
 
 
     @api.depends("yearOfBirth")
@@ -67,14 +91,22 @@ class swimmer(models.Model):
 
         product = self.env.ref("natacion.product_cuota_anual")
 
+        start_date = fields.Date.today()
+
+        end_dt = fields.Date.from_string(start_date)
+        end_dt = end_dt.replace(year=end_dt.year + 1)
+
         order = self.env["sale.order"].create({
             "partner_id": self.id,
+            "validity_date": end_dt,
         })
 
         self.env["sale.order.line"].create({
         "order_id": order.id,
         "product_id": product.id,
         })
+
+        self.membership_end_date = end_dt
 
         return order.get_formview_action()
     
