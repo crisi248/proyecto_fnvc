@@ -6,36 +6,65 @@
       <field name="name">sets list</field>
       <field name="model">natacion.set</field>
       <field name="arch" type="xml">
-        <list string="Sets">
+        <list string="Series">
           <field name="name" />
           <field name="test_id" />
+          <field name="results" string="Resultados" />
         </list>
       </field>
     </record>
+
 
     <!-- Form view -->
     <record id="view_set_form" model="ir.ui.view">
       <field name="name">sets form</field>
       <field name="model">natacion.set</field>
       <field name="arch" type="xml">
-        <form string="Set">
+        <form string="Serie">
           <sheet>
             <group>
               <field name="name" />
               <field name="test_id" />
             </group>
+
+            <notebook>
+              <page string="Resultados">
+                <field name="results" />
+              </page>
+            </notebook>
+
           </sheet>
         </form>
       </field>
     </record>
 
+    <!-- List view Resultados -->
+    <record id="view_result_list" model="ir.ui.view">
+      <field name="name">natacion.result.list</field>
+      <field name="model">natacion.result</field>
+      <field name="arch" type="xml">
+        <list string="Resultados">
+          <field name="swimmer_id" />
+          <field name="test_id" />
+          <field name="category_id" />
+          <field name="style_id" />
+          <field name="set_id" />
+          <field name="time" />
+        </list>
+      </field>
+    </record>
+
+    <!-- Action -->
     <record model="ir.actions.act_window" id="natacion.action_sets_window">
-      <field name="name">natacion Set window</field>
+      <field name="name">Series</field>
       <field name="res_model">natacion.set</field>
       <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem name="Sets" id="natacion.menu_sets" parent="natacion.menu_management"
+    <!-- Menu -->
+    <menuitem name="Series" id="natacion.menu_sets"
+      parent="natacion.menu_management"
       action="natacion.action_sets_window" />
+
   </data>
 </odoo>

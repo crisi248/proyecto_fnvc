@@ -86,7 +86,6 @@
       </field>
     </record>
 
-
     <!-- Form view -->
     <record id="view_swimmer_form" model="ir.ui.view">
       <field name="name">swimmers form</field>
@@ -105,13 +104,10 @@
               <field name="is_swimmer" />
             </group>
             <group>
-              <field name="bestStyle" widget="one2many_list">
-                <list>
-                  <field name="name" />
-                </list>
-              </field>
+              <field name="bestStyle" string="Best Style"/>
             </group>
             <group>
+              <field name="championship" widget="many2many_tags" />
               <field name="sessions" widget="many2many_tags" />
               <field name="tests" widget="many2many_tags" />
               <field name="membership_progress" widget="progressbar" />
