@@ -6,16 +6,20 @@
       <field name="model">natacion.club</field>
       <field name="arch" type="xml">
         <list string="Clubs">
-          <field name="name" />
-          <field name="image" />
+          <!-- Aplicar color condicional utilizando t-att-style -->
+          <field name="name" 
+                 t-att-style="color: #{'FFD700' if ranking == 1 else 'C0C0C0' if ranking == 2 else 'cd7f32' if ranking == 3 else '808080'};"
+                 string="Club"/>
           <field name="town" />
+          <field name="points" />
           <field name="championships" widget="many2many_tags" />
           <field name="swimmers_list" widget="one2many_tags" />
+          <field name="medal_emoji" />
         </list>
       </field>
     </record>
 
-        <!-- Kanban view -->
+    <!-- Kanban view -->
     <record id="view_club_kanban" model="ir.ui.view">
       <field name="name">clubs kanban</field>
       <field name="model">natacion.club</field>
@@ -24,23 +28,34 @@
           <field name="name" />
           <field name="image" />
           <field name="town" />
+          <field name="points" />
+          <field name="championships" widget="many2many_tags" />
+          <field name="swimmers_list" widget="one2many_tags" />
+          <field name="medal_emoji" />
+          <field name="ribbon_color" />
 
           <templates>
             <t t-name="kanban-box">
-              <div style="display:flex; align-items:center; padding:8px;">
-                <div>
-                  <img t-att-src="kanban_image('natacion.club', 'image', record.id.value)"
-                    t-att-alt="record.name.value"
-                    style="width:64px; height:64px; margin-right:8px; border-radius:4px; object-fit:cover;" />
-                </div>
-                <div>
-                  <strong>
-                    <field name="name" />
-                  </strong>
-                  <br />
-                  <span>
-                    <field name="town" />
-                  </span>
+              <div t-attf-class="o_kanban_card o_kanban_record">
+                <div
+                  t-attf-style="background-color: #{record.ribbon_color.value}; border-radius: 4px; padding: 8px;">
+                  <div style="display:flex; align-items:center; padding:8px;">
+                    <div>
+                      <img t-att-src="kanban_image('natacion.club', 'image', record.id.value)"
+                        t-att-alt="record.name.value"
+                        style="width:64px; height:64px; margin-right:8px; border-radius:4px; object-fit:cover;" />
+                    </div>
+                    <div>
+                      <strong>
+                        <field name="name" />
+                      </strong>
+                      <br />
+                      <span>
+                        <field name="town" />
+                      </span>
+                      <span t-esc="record.medal_emoji.value" style="font-size:24px;"></span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </t>
@@ -48,6 +63,7 @@
         </kanban>
       </field>
     </record>
+
 
     <!-- Form view -->
     <record id="view_club_form" model="ir.ui.view">
@@ -61,6 +77,7 @@
               <field name="image" widget="image" />
               <field name="town" />
               <field name="championships" widget="many2many_tags" />
+              <field name="points" />
               <field name="swimmers_list" widget="one2many_tags" />
             </group>
           </sheet>

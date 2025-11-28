@@ -17,7 +17,45 @@ class Club(models.Model):
         string="Nadadores"
     )
     championships = fields.Many2many("natacion.championship")
+    points = fields.Integer(readonly=True)
+    ribbon_color = fields.Char(compute="_compute_ribbon_color", string="Color del Ribbon", readonly=True)
+    medal_emoji = fields.Char(compute="_compute_medal_emoji", string="Medal Emoji", readonly=True)
+    ranking = fields.Integer(compute="_compute_ranking", string="Ranking", readonly=True)
 
+    @api.depends('points')
+    def _compute_ranking(self):
+        for club in self:
+            if club.ranking is None: 
+                club.ranking = 9999 
+        
+        clubs = self.env["natacion.club"].search([('points', '>', 0)], order="points desc")
+        
+        for index, club in enumerate(clubs, 1):
+            club.ranking = index
+
+    @api.depends('ranking')
+    def _compute_medal_emoji(self):
+        for club in self:
+            if club.ranking == 1:
+                club.medal_emoji = "🥇"
+            elif club.ranking == 2:
+                club.medal_emoji = "🥈" 
+            elif club.ranking == 3:
+                club.medal_emoji = "🥉" 
+            else:
+                club.medal_emoji = ""
+
+    @api.depends('ranking')
+    def _compute_ribbon_color(self):
+        for club in self:
+            if club.ranking == 1:
+                club.ribbon_color = "#FFD700"
+            elif club.ranking == 2:
+                club.ribbon_color = "#C0C0C0"
+            elif club.ranking == 3:
+                club.ribbon_color = "#cd7f32"
+            else:
+                club.ribbon_color = "transparent" 
 
 
 class category(models.Model):
@@ -184,7 +222,6 @@ class session(models.Model):
     @api.constrains("date", "championship_id")
     def _check_session_date(self):
         for record in self:
-            # Si no hay campeonato o fecha, no validamos
             if not record.championship_id or not record.date:
                 continue
 
@@ -192,7 +229,6 @@ class session(models.Model):
             end = record.championship_id.end_date
             session_date = record.date
 
-            # 1️⃣ Fecha dentro del rango del campeonato
             if session_date < start:
                 raise ValidationError(
                     "La fecha de la sesión (%s) no puede ser anterior "
@@ -204,8 +240,7 @@ class session(models.Model):
                     "La fecha de la sesión (%s) no puede ser posterior "
                     "al final del campeonato (%s)." % (session_date, end)
                 )
-
-            # 2️⃣ Validación: no repetir fecha dentro del mismo campeonato
+            
             for s in record.championship_id.sessions:
                 if s.id != record.id:
                     if s.date == session_date:
@@ -273,12 +308,14 @@ class result(models.Model):
     def create(self, vals):
         result = super().create(vals)
         result._update_swimmer_best_time()
+        result._update_club_points()  
         return result
 
     def write(self, vals):
         res = super().write(vals)
         for record in self:
             record._update_swimmer_best_time()
+            record._update_club_points()  
         return res
 
     def _update_swimmer_best_time(self):
@@ -290,6 +327,23 @@ class result(models.Model):
         if not swimmer.bestTime or swimmer.bestTime == 0 or new_time < swimmer.bestTime:
             swimmer.bestTime = new_time
             swimmer.bestStyle = style
+
+    def _update_club_points(self):
+        swimmer = self.swimmer_id
+        if swimmer.club:
+
+            if self.time == 0:  
+                return
+            
+            if self.time <= 10:  
+                points = 100
+            elif self.time <= 30:  
+                points = max(0, 100 - ((self.time - 10) * 3.33))  
+            else:  
+                points = 0
+
+            
+            swimmer.club.points = swimmer.club.points + int(points)  
 
     def unlink(self):
         swimmers_to_update = self.mapped("swimmer_id")
@@ -310,6 +364,7 @@ class result(models.Model):
                 swimmer.bestStyle = False
 
         return res
+
 
 
 
