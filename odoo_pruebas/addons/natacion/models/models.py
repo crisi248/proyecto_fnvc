@@ -138,13 +138,11 @@ class championship(models.Model):
     name = fields.Char(required=True)
     clubs = fields.Many2many("natacion.club")
 
-    # Nadadores independientes añadidos manualmente
     independent_swimmers = fields.Many2many(
         "res.partner",
         string="Nadadores independientes"
     )
 
-    # Todos los nadadores (club + independientes)
     swimmers = fields.Many2many(
         "res.partner",
         compute="_compute_swimmers",
@@ -152,7 +150,7 @@ class championship(models.Model):
         readonly=True
     )
 
-    start_date = fields.Datetime()
+    start_date = fields.Datetime(required=True)
     end_date = fields.Datetime()
     sessions = fields.One2many("natacion.session", "championship_id")
 
@@ -170,9 +168,50 @@ class session(models.Model):
 
     name = fields.Char(required=True)
     date = fields.Datetime()
+    sessionTime = fields.Integer(compute="_compute_sessionTime", store=True, readonly=True)
     championship_id = fields.Many2one("natacion.championship", ondelete="set null")
     tests = fields.One2many("natacion.test", "session_id")
     swimmers = fields.Many2many("res.partner")
+
+    @api.depends("tests.timeTest")
+    def _compute_sessionTime(self):
+        for record in self:
+            total = 0
+            for test in record.tests:
+                total += test.timeTest
+            record.sessionTime = total
+
+    @api.constrains("date", "championship_id")
+    def _check_session_date(self):
+        for record in self:
+            # Si no hay campeonato o fecha, no validamos
+            if not record.championship_id or not record.date:
+                continue
+
+            start = record.championship_id.start_date
+            end = record.championship_id.end_date
+            session_date = record.date
+
+            # 1️⃣ Fecha dentro del rango del campeonato
+            if session_date < start:
+                raise ValidationError(
+                    "La fecha de la sesión (%s) no puede ser anterior "
+                    "al inicio del campeonato (%s)." % (session_date, start)
+                )
+
+            if end and session_date > end:
+                raise ValidationError(
+                    "La fecha de la sesión (%s) no puede ser posterior "
+                    "al final del campeonato (%s)." % (session_date, end)
+                )
+
+            # 2️⃣ Validación: no repetir fecha dentro del mismo campeonato
+            for s in record.championship_id.sessions:
+                if s.id != record.id:
+                    if s.date == session_date:
+                        raise ValidationError(
+                            "Ya existe otra sesión en este campeonato con la misma fecha (%s)." % session_date
+                        )
 
 class test(models.Model):
     _name = "natacion.test"
@@ -185,6 +224,12 @@ class test(models.Model):
     swimmers = fields.Many2many("res.partner")
     sets = fields.One2many("natacion.set", "test_id")
     session_id = fields.Many2one("natacion.session", ondelete="set null")
+    timeTest = fields.Integer(compute="_compute_timeTest", store=True, readonly=True)
+
+    @api.depends("sets")
+    def _compute_timeTest(self):
+        for record in self:
+            record.timeTest = len(record.sets) * 10
 
 class set(models.Model):
     _name = "natacion.set"
@@ -214,7 +259,6 @@ class result(models.Model):
         readonly=True
     )
 
-    # Al seleccionar un test, asigna estilo y categoría automáticamente
     @api.onchange('test_id')
     def _onchange_test(self):
         for r in self:
@@ -225,21 +269,18 @@ class result(models.Model):
                 r.category_id = False
                 r.style_id = False
 
-    # Actualiza mejor tiempo al crear
     @api.model
     def create(self, vals):
         result = super().create(vals)
         result._update_swimmer_best_time()
         return result
 
-    # Actualiza mejor tiempo al editar
     def write(self, vals):
         res = super().write(vals)
         for record in self:
             record._update_swimmer_best_time()
         return res
 
-    # Actualiza mejor tiempo del nadador (solo si este resultado es mejor)
     def _update_swimmer_best_time(self):
         swimmer = self.swimmer_id
         test = self.test_id
@@ -250,15 +291,12 @@ class result(models.Model):
             swimmer.bestTime = new_time
             swimmer.bestStyle = style
 
-    # --- NUEVO ---
-    # Recalcula el mejor tiempo cuando se BORRA un resultado
     def unlink(self):
         swimmers_to_update = self.mapped("swimmer_id")
 
         res = super().unlink()
 
         for swimmer in swimmers_to_update:
-            # Todos los resultados restantes del nadador
             remaining_results = self.env["natacion.result"].search([
                 ("swimmer_id", "=", swimmer.id)
             ])

@@ -24,6 +24,7 @@
             <group>
               <field name="name" />
               <field name="date" />
+              <field name="sessionTime" />
               <field name="championship_id" />
             </group>
             <notebook>
