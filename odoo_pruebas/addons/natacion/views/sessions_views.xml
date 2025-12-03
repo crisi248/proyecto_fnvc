@@ -45,13 +45,29 @@
       </field>
     </record>
 
-    <record model="ir.actions.act_window" id="natacion.action_sessions_window">
-      <field name="name">natacion Session window</field>
-      <field name="res_model">natacion.session</field>
-      <field name="view_mode">list,form</field>
+    <!-- Calendar view -->
+    <record id="view_session_calendar" model="ir.ui.view">
+      <field name="name">natacion.session.calendar</field>
+      <field name="model">natacion.session</field>
+      <field name="arch" type="xml">
+        <calendar string="Sesiones de Natación" date_start="date" color="championship_id">
+          <field name="name" />
+          <field name="championship_id" />
+        </calendar>
+      </field>
     </record>
 
+    <!-- Action window -->
+    <record model="ir.actions.act_window" id="natacion.action_sessions_window">
+      <field name="name">Sesiones de Natación</field>
+      <field name="res_model">natacion.session</field>
+      <field name="view_mode">calendar,list,form</field>
+    </record>
+
+
+    <!-- Menu item -->
     <menuitem name="Sessions" id="natacion.menu_sessions" parent="natacion.menu_management"
       action="natacion.action_sessions_window" />
+
   </data>
 </odoo>

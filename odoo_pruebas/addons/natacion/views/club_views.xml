@@ -6,15 +6,12 @@
       <field name="model">natacion.club</field>
       <field name="arch" type="xml">
         <list string="Clubs">
-          <!-- Aplicar color condicional utilizando t-att-style -->
-          <field name="name" 
-                 t-att-style="color: #{'FFD700' if ranking == 1 else 'C0C0C0' if ranking == 2 else 'cd7f32' if ranking == 3 else '808080'};"
-                 string="Club"/>
+          <field name="name" string="Club" />
           <field name="town" />
           <field name="points" />
           <field name="championships" widget="many2many_tags" />
           <field name="swimmers_list" widget="one2many_tags" />
-          <field name="medal_emoji" />
+          <field name="medal" />
         </list>
       </field>
     </record>
@@ -31,7 +28,7 @@
           <field name="points" />
           <field name="championships" widget="many2many_tags" />
           <field name="swimmers_list" widget="one2many_tags" />
-          <field name="medal_emoji" />
+          <field name="medal" />
           <field name="ribbon_color" />
 
           <templates>
@@ -53,7 +50,7 @@
                       <span>
                         <field name="town" />
                       </span>
-                      <span t-esc="record.medal_emoji.value" style="font-size:24px;"></span>
+                      <span t-esc="record.medal.value" style="font-size:24px;"></span>
                     </div>
                   </div>
                 </div>
@@ -61,6 +58,38 @@
             </t>
           </templates>
         </kanban>
+      </field>
+    </record>
+
+    <!-- Lista personalizada de nadador para club -->
+
+    <record id="view_swimmer_list_custom" model="ir.ui.view">
+      <field name="name">natacion.swimmer.list.custom</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <list>
+          <field name="name" string="Nadador" />
+          <field name="championship" widget="many2many_tags" string="Campeonatos" />
+          <field name="bestTime" string="Mejor Tiempo" />
+          <field name="category" string="Categoría" />
+        </list>
+      </field>
+    </record>
+
+    <record id="view_swimmer_form_custom" model="ir.ui.view">
+      <field name="name">natacion.swimmer.form.custom</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="championship" widget="many2many_tags" />
+              <field name="bestTime" />
+              <field name="category" />
+            </group>
+          </sheet>
+        </form>
       </field>
     </record>
 
@@ -78,7 +107,17 @@
               <field name="town" />
               <field name="championships" widget="many2many_tags" />
               <field name="points" />
-              <field name="swimmers_list" widget="one2many_tags" />
+              <field name="swimmers_list"
+                widget="one2many"
+                domain="[('is_swimmer', '=', True)]"
+                context="{
+           'default_is_swimmer': True,
+           'tree_view_ref': 'natacion.view_swimmer_list_custom',
+           'form_view_ref': 'natacion.view_swimmer_form_custom'
+            }"
+              />
+
+
             </group>
           </sheet>
         </form>

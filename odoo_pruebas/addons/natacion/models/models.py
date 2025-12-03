@@ -19,7 +19,7 @@ class Club(models.Model):
     championships = fields.Many2many("natacion.championship")
     points = fields.Integer(readonly=True)
     ribbon_color = fields.Char(compute="_compute_ribbon_color", string="Color del Ribbon", readonly=True)
-    medal_emoji = fields.Char(compute="_compute_medal_emoji", string="Medal Emoji", readonly=True)
+    medal = fields.Char(compute="_compute_medal", string="Medal Emoji", readonly=True)
     ranking = fields.Integer(compute="_compute_ranking", string="Ranking", readonly=True)
 
     @api.depends('points')
@@ -34,16 +34,16 @@ class Club(models.Model):
             club.ranking = index
 
     @api.depends('ranking')
-    def _compute_medal_emoji(self):
+    def _compute_medal(self):
         for club in self:
             if club.ranking == 1:
-                club.medal_emoji = "🥇"
+                club.medal = "🥇"
             elif club.ranking == 2:
-                club.medal_emoji = "🥈" 
+                club.medal = "🥈" 
             elif club.ranking == 3:
-                club.medal_emoji = "🥉" 
+                club.medal = "🥉" 
             else:
-                club.medal_emoji = ""
+                club.medal = ""
 
     @api.depends('ranking')
     def _compute_ribbon_color(self):
@@ -67,6 +67,12 @@ class category(models.Model):
     maxAge = fields.Integer()
     swimmers_list = fields.One2many("res.partner", "category")
     tests = fields.One2many("natacion.test", "category_id")
+
+    @api.constrains("minAge", "maxAge")
+    def _check_age_range(self):
+        for rec in self:
+            if rec.minAge and rec.maxAge and rec.minAge > rec.maxAge:
+                raise ValidationError("La edad mínima no puede ser mayor que la edad máxima.")
 
 class swimmer(models.Model):
     #_name = "natacion.swimmer"
