@@ -1,0 +1,49 @@
+<odoo>
+    <data>
+
+        <!-- VISTA LISTA -->
+        <record id="view_incidencia_list" model="ir.ui.view">
+            <field name="name">simagrow.incidencia.list</field>
+            <field name="model">simagrow.incidencia</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="idIncidencia"/>
+                    <field name="descripcion"/>
+                    <field name="usuario_id"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- VISTA FORMULARIO -->
+        <record id="view_incidencia_form" model="ir.ui.view">
+            <field name="name">simagrow.incidencia.form</field>
+            <field name="model">simagrow.incidencia</field>
+            <field name="arch" type="xml">
+                <form string="Incidencia">
+                    <sheet>
+                        <group>
+                            <field name="idIncidencia" readonly="1"/>
+                            <field name="descripcion"/>
+                            <field name="usuario_id"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ACCIÓN -->
+        <record id="action_incidencia" model="ir.actions.act_window">
+            <field name="name">Incidencias</field>
+            <field name="res_model">simagrow.incidencia</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <!-- MENÚ (Opcional) -->
+        <!-- Solo si quieres ver incidencias desde el menú principal -->
+        <menuitem id="menu_simagrow_incidencias"
+                  name="Incidencias"
+                  parent="simagrow.menu_root_simagrow"
+                  action="simagrow.action_incidencia"/>
+
+    </data>
+</odoo>

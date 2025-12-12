@@ -1,0 +1,94 @@
+<odoo>
+    <data>
+
+        <!--LISTA-->
+
+        <record id="view_usuario_list" model="ir.ui.view">
+            <field name="name">simagrow.usuario.list</field>
+            <field name="model">simagrow.usuario</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="nombre" />
+                    <field name="apellidos" />
+                    <field name="correo" />
+                    <field name="fecha_nacimiento" string="Fecha de Nacimiento" />
+                    <field name="num_incidencias" string="Número de Incidencias" />
+                    <field name="creditos" string="Créditos" />
+                </list>
+            </field>
+        </record>
+
+        <!--FORMULARIO-->
+
+        <record id="view_usuario_form" model="ir.ui.view">
+            <field name="name">simagrow.usuario.form</field>
+            <field name="model">simagrow.usuario</field>
+            <field name="arch" type="xml">
+                <form string="Usuario">
+                    <sheet>
+                        <group>
+                            <field name="nombre" />
+                            <field name="apellidos" />
+                            <field name="correo" />
+                            <field name="fecha_nacimiento" string="Fecha de Nacimiento" />
+                            <field name="creditos" string="Créditos" />
+                        </group>
+                        <notebook>
+                            <page string="Incidencias">
+                                <field name="incidencia_ids" />
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--KANBAN-->
+
+        <record id="view_usuario_kanban" model="ir.ui.view">
+            <field name="name">simagrow.usuario.kanban</field>
+            <field name="model">simagrow.usuario</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="nombre" />
+                    <field name="apellidos" />
+                    <field name="correo" />
+                    <field name="fecha_nacimiento" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <strong>
+                                    <t t-esc="record.nombre.value" />
+                                </strong>
+                                <br />
+                                <t t-esc="record.apellidos.value" />
+                                <br />
+                                <t t-esc="record.correo.value" />
+                                <br />
+                                <small>
+                                    <t t-esc="record.fecha_nacimiento.value" />
+                                </small>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!--ACTIONS-->
+
+        <record id="action_usuario" model="ir.actions.act_window">
+            <field name="name">Usuarios</field>
+            <field name="res_model">simagrow.usuario</field>
+            <field name="view_mode">list,form,kanban</field>
+        </record>
+
+        <menuitem id="menu_root_simagrow" name="Simagrow" />
+        <menuitem id="menu_simagrow_usuario"
+            name="Usuarios"
+            parent="simagrow.menu_root_simagrow"
+            action="simagrow.action_usuario" />
+
+
+    </data>
+</odoo>

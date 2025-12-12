@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "natacion",
+    'name': "simagrow",
 
     'summary': "Short (1 phrase/line) summary of the module's purpose",
 
@@ -18,32 +18,18 @@ Long description of module's purpose
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', "sale"], 
+    'depends': ['base'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
-        'views/categories_views.xml',
-        'views/championships_views.xml',
-        'views/club_views.xml',
-        'views/sessions_views.xml',
-        'views/sets_views.xml',          
-        'views/styles_views.xml',
-        'views/swimmers_views.xml',
-        'views/tests_views.xml',      
-        'views/views.xml', 
-        'views/templates.xml',
-        'demo/categories.xml',
-        'demo/clubs.xml',
-        'demo/swimmers.xml',
-        'demo/cuota.xml',
+        'views/views.xml',
+        'views/usuario_views.xml',
+        'views/incidencia_views.xml', 
+
     ],
     # only loaded in demonstration mode
     'demo': [
-        'demo/categories.xml',
-        'demo/clubs.xml',
-        'demo/swimmers.xml',
-        'demo/cuota.xml',
         'demo/demo.xml',
     ],
 }
