@@ -6,6 +6,7 @@ class Usuario(models.Model):
     _name = 'simagrow.usuario'
     _description = 'Usuario de Simagrow'
 
+    nif = fields.Char(required=True)
     nombre = fields.Char(required=True)
     apellidos = fields.Char(required=True)
     fecha_nacimiento = fields.Date(required=True)
