@@ -15,7 +15,8 @@ services:
       - USER=odoo
       - PASSWORD=odoo
     #command: ["--dev=all", "-u", "natacion", "-d", "fncv"]
-    command: ["--dev=all", "-u", "simagrow", "-d", "simagrow"]
+    #command: ["--dev=all", "-u", "simagrow", "-d", "simagrow"]
+    command: ["--dev=all", "-u", "employees", "-d", "employees"]
     tty: true
 
   db:

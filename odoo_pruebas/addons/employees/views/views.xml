@@ -1,0 +1,87 @@
+<odoo>
+  <data>
+
+    <!-- FORMVIEW HR.EMPLOYEE-->
+    <record id="employees.formulario_empleado" model="ir.ui.view">
+      <field name="name">hr.employee.form</field>
+      <field name="model">hr.employee</field>
+      <field name="inherit_id" ref="hr.view_employee_form" />
+      <field name="arch" type="xml">
+
+        <notebook position="inside">
+          <page string="More info">
+            <group>
+              <field name="tipo_contrato" string="Tipo de contrato" />
+              <field name="salario_base" />
+              <field name="nomina" />
+            </group>
+
+          </page>
+        </notebook>
+
+      </field>
+    </record>
+
+    <!-- NOMINA-->
+
+    <record id="view_nomina_list" model="ir.ui.view">
+      <field name="name">nomina list</field>
+      <field name="model">employees.nomina</field>
+      <field name="arch" type="xml">
+        <list string="Nominas">
+          <field name="estado" />
+          <field name="total_salario" />
+        </list>
+      </field>
+    </record>
+
+    <record id="view_nomina_form" model="ir.ui.view">
+      <field name="name">nomina form</field>
+      <field name="model">employees.nomina</field>
+      <field name="arch" type="xml">
+        <form string="Nomina">
+          <sheet>
+            <group>
+              <field name="estado" />
+              <field name="total_salario" />
+              <field name="fecha_inicio" />
+              <field name="fecha_fin" />
+              <field name="id_empleado" />
+              <field name="conceptos" />
+              <button name="concepto_basico" type="object" string="Añadir salario base de concepto" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- Calendar view -->
+    
+    <record id="view_nomina_calendar" model="ir.ui.view">
+      <field name="name">employees.nomina.calendar</field>
+      <field name="model">employees.nomina</field>
+      <field name="arch" type="xml">
+        <calendar string="Calendario de nominas" date_start="fecha_inicio" date_stop="fecha_fin" color="id_empleado">
+          <field name="estado" />
+          <field name="id_empleado" />
+        </calendar>
+      </field>
+    </record>
+
+    <record id="employees.action_nomina" model="ir.actions.act_window">
+      <field name="name">Nominas</field>
+      <field name="res_model">employees.nomina</field>
+      <field name="view_mode">list,form,calendar</field>
+    </record>
+
+    <menuitem name="employees" id="employees.menu_root_employees"/>
+
+    <menuitem name="Management" id="employees.menu_management" parent="employees.menu_root_employees"/>
+
+    <menuitem name="Calendar" id="employees.menu_calendar" parent="employees.menu_management"
+      action="employees.action_nomina" />
+
+    
+
+  </data>
+</odoo>

@@ -1,0 +1,20 @@
+<odoo>
+  <data>
+
+    <record id="employees.concepto1" model="employees.concepto">
+      <field name="tipo">Salario Base</field>
+      <field name="name">Salario Base</field>
+    </record>
+
+    <record id="employees.concepto2" model="employees.concepto">
+      <field name="tipo">Incentivo</field>
+      <field name="name">Incentivo</field>
+    </record>
+
+    <record id="employees.concepto3" model="employees.concepto">
+      <field name="tipo">Horas extra</field>
+      <field name="name">Horas extra</field>
+    </record>
+
+  </data>
+</odoo>
