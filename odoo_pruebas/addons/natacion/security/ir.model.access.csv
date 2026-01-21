@@ -7,3 +7,4 @@ access_natacion_session,natacion.session,model_natacion_session,base.group_user,
 access_natacion_test,natacion.test,model_natacion_test,base.group_user,1,1,1,1
 access_natacion_set,natacion.set,model_natacion_set,base.group_user,1,1,1,1
 access_natacion_result,natacion.result,model_natacion_result,base.group_user,1,1,1,1
+access_natacion_register_swimmer_wizard,natacion.register.swimmer.wizard,model_natacion_register_swimmer_wizard,base.group_user,1,1,1,1

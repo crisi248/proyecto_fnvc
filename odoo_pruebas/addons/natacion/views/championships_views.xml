@@ -1,7 +1,38 @@
 <odoo>
   <data>
 
-    <!-- List view -->
+    <!-- ===================== -->
+    <!-- WIZARD ACTION -->
+    <!-- ===================== -->
+    <record id="action_register_swimmer_wizard" model="ir.actions.act_window">
+      <field name="name">Inscribir Nadador</field>
+      <field name="res_model">natacion.register.swimmer.wizard</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <!-- ===================== -->
+    <!-- WIZARD VIEW -->
+    <!-- ===================== -->
+    <record id="view_register_swimmer_wizard_form" model="ir.ui.view">
+      <field name="name">register.swimmer.wizard.form</field>
+      <field name="model">natacion.register.swimmer.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Inscribir Nadador">
+          <group>
+            <field name="swimmer_id" />
+          </group>
+          <footer>
+            <button string="Confirmar" type="object" name="action_confirm" class="btn-primary" />
+            <button string="Cancelar" special="cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <!-- ===================== -->
+    <!-- CHAMPIONSHIP LIST -->
+    <!-- ===================== -->
     <record id="view_championship_list" model="ir.ui.view">
       <field name="name">championships list</field>
       <field name="model">natacion.championship</field>
@@ -16,43 +47,61 @@
       </field>
     </record>
 
-    <!-- Form view -->
+    <!-- ===================== -->
+    <!-- CHAMPIONSHIP FORM -->
+    <!-- ===================== -->
     <record id="view_championship_form" model="ir.ui.view">
       <field name="name">championships form</field>
       <field name="model">natacion.championship</field>
       <field name="arch" type="xml">
         <form string="Championship">
           <sheet>
+
+            <header>
+              <button name="%(natacion.action_register_swimmer_wizard)d"
+                type="action"
+                string="Inscribir Nadador"
+                class="btn-primary"
+                context="{'default_championship_id': active_id}" />
+            </header>
             <group>
               <field name="name" />
               <field name="start_date" />
               <field name="end_date" />
               <field name="clubs" widget="many2many_tags" />
-              <field name="swimmers" widget="many2many_tags" />
+              <field name="swimmers" widget="many2many_tags" readonly="1" />
             </group>
+
             <notebook>
               <page string="Sessions">
                 <field name="sessions">
                   <list>
                     <field name="name" />
                     <field name="date" />
+                    <field name="sessionTime" />
                   </list>
                 </field>
               </page>
             </notebook>
+
           </sheet>
         </form>
       </field>
     </record>
 
+    <!-- ===================== -->
+    <!-- ACTION + MENU -->
+    <!-- ===================== -->
     <record model="ir.actions.act_window" id="natacion.action_championships_window">
-      <field name="name">natacion Championship window</field>
+      <field name="name">Championships</field>
       <field name="res_model">natacion.championship</field>
       <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem name="Championships" id="natacion.menu_championships"
+    <menuitem name="Championships"
+      id="natacion.menu_championships"
       parent="natacion.menu_management"
       action="natacion.action_championships_window" />
+
   </data>
 </odoo>

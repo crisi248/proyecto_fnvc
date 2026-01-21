@@ -81,7 +81,6 @@
     <menuitem name="Calendar" id="employees.menu_calendar" parent="employees.menu_management"
       action="employees.action_nomina" />
 
-    
-
+  
   </data>
 </odoo>

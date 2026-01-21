@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import date
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
@@ -184,6 +185,9 @@ class championship(models.Model):
 
     independent_swimmers = fields.Many2many(
         "res.partner",
+        compute="_compute_independent_swimmers",
+        store=True,
+        readonly=True,
         string="Nadadores independientes"
     )
 
@@ -196,13 +200,21 @@ class championship(models.Model):
 
     start_date = fields.Datetime(required=True)
     end_date = fields.Datetime()
-    sessions = fields.One2many("natacion.session", "championship_id")
+    sessions = fields.One2many("natacion.session", "championship_id", ondelete="cascade")
+
+    @api.depends("sessions.swimmers")
+    def _compute_independent_swimmers(self):
+        for record in self:
+            swimmers = record.sessions.mapped("swimmers")
+            record.independent_swimmers = swimmers
+
 
     @api.depends("clubs", "clubs.swimmers_list", "independent_swimmers")
     def _compute_swimmers(self):
         for record in self:
             club_swimmers = record.clubs.mapped("swimmers_list")
             record.swimmers = club_swimmers | record.independent_swimmers
+
 
 
             
@@ -214,8 +226,18 @@ class session(models.Model):
     date = fields.Datetime()
     sessionTime = fields.Integer(compute="_compute_sessionTime", store=True, readonly=True)
     championship_id = fields.Many2one("natacion.championship", ondelete="set null")
-    tests = fields.One2many("natacion.test", "session_id")
-    swimmers = fields.Many2many("res.partner")
+    tests = fields.One2many("natacion.test", "session_id", ondelete="cascade")
+    swimmers = fields.Many2many(
+    "res.partner",
+    compute="_compute_swimmers",
+    store=True,
+    readonly=True)
+
+    @api.depends("tests.swimmers")
+    def _compute_swimmers(self):
+        for record in self:
+            swimmers = record.tests.mapped("swimmers")
+            record.swimmers = swimmers
 
     @api.depends("tests.timeTest")
     def _compute_sessionTime(self):
@@ -259,13 +281,19 @@ class test(models.Model):
     _description = "Test de natación"
 
     name = fields.Char(required=True)
-    description = fields.Char(required=True)
+    description = fields.Char()
     style_id = fields.Many2one("natacion.style", ondelete="set null")
     category_id = fields.Many2one("natacion.category", ondelete="set null")
-    swimmers = fields.Many2many("res.partner")
-    sets = fields.One2many("natacion.set", "test_id")
-    session_id = fields.Many2one("natacion.session", ondelete="set null")
+    swimmers = fields.Many2many("res.partner",compute="_compute_swimmers",store=True,readonly=True)
+    sets = fields.One2many("natacion.set", "test_id", ondelete="cascade")
+    session_id = fields.Many2one("natacion.session")
     timeTest = fields.Integer(compute="_compute_timeTest", store=True, readonly=True)
+
+    @api.depends("sets.results.swimmer_id")
+    def _compute_swimmers(self):
+        for record in self:
+            swimmers = record.sets.mapped("results.swimmer_id")
+            record.swimmers = swimmers
 
     @api.depends("sets")
     def _compute_timeTest(self):
@@ -277,51 +305,67 @@ class set(models.Model):
     _description = "Set de natación"
 
     name = fields.Char(required=True)
-    test_id = fields.Many2one("natacion.test", ondelete="set null")
+    test_id = fields.Many2one("natacion.test", ondelete="cascade")
     results = fields.One2many("natacion.result", "set_id", string="Resultados")
 
 class result(models.Model):
     _name = "natacion.result"
     _description = "Resultado de un nadador en una serie"
 
-    swimmer_id = fields.Many2one("res.partner", required=True, string="Nadador")
-    test_id = fields.Many2one("natacion.test", required=True, string="Prueba")
-    set_id = fields.Many2one("natacion.set", required=True, string="Serie")
-    time = fields.Float(required=True, help="Tiempo en segundos")
+    swimmer_id = fields.Many2one(
+        "res.partner",
+        required=True,
+        string="Nadador"
+    )
+
+    set_id = fields.Many2one(
+        "natacion.set",
+        required=True,
+        string="Serie",
+        ondelete="cascade"
+    )
+
+    test_id = fields.Many2one(
+        "natacion.test",
+        string="Prueba",
+        related="set_id.test_id",
+        store=True,
+        readonly=True
+    )
+
+    time = fields.Float(
+        required=True,
+        help="Tiempo en segundos"
+    )
 
     category_id = fields.Many2one(
         "natacion.category",
         string="Categoría",
-        readonly=True
-    )
-    style_id = fields.Many2one(
-        "natacion.style",
-        string="Estilo",
+        related="test_id.category_id",
+        store=True,
         readonly=True
     )
 
-    @api.onchange('test_id')
-    def _onchange_test(self):
-        for r in self:
-            if r.test_id:
-                r.category_id = r.test_id.category_id
-                r.style_id = r.test_id.style_id
-            else:
-                r.category_id = False
-                r.style_id = False
+    style_id = fields.Many2one(
+        "natacion.style",
+        string="Estilo",
+        related="test_id.style_id",
+        store=True,
+        readonly=True
+    )
 
     @api.model
     def create(self, vals):
         result = super().create(vals)
         result._update_swimmer_best_time()
-        result._update_club_points()  
+        result._update_club_points()
         return result
 
     def write(self, vals):
         res = super().write(vals)
         for record in self:
             record._update_swimmer_best_time()
-            record._update_club_points()  
+            record._update_club_points()
         return res
 
     def _update_swimmer_best_time(self):
@@ -329,7 +373,7 @@ class result(models.Model):
         test = self.test_id
         style = test.style_id if test else False
         new_time = self.time
-        
+
         if not swimmer.bestTime or swimmer.bestTime == 0 or new_time < swimmer.bestTime:
             swimmer.bestTime = new_time
             swimmer.bestStyle = style
@@ -337,23 +381,20 @@ class result(models.Model):
     def _update_club_points(self):
         swimmer = self.swimmer_id
         if swimmer.club:
-
-            if self.time == 0:  
+            if self.time == 0:
                 return
-            
-            if self.time <= 10:  
+
+            if self.time <= 10:
                 points = 100
-            elif self.time <= 30:  
-                points = max(0, 100 - ((self.time - 10) * 3.33))  
-            else:  
+            elif self.time <= 30:
+                points = max(0, 100 - ((self.time - 10) * 3.33))
+            else:
                 points = 0
 
-            
-            swimmer.club.points = swimmer.club.points + int(points)  
+            swimmer.club.points = swimmer.club.points + int(points)
 
     def unlink(self):
         swimmers_to_update = self.mapped("swimmer_id")
-
         res = super().unlink()
 
         for swimmer in swimmers_to_update:
@@ -373,12 +414,58 @@ class result(models.Model):
 
 
 
+class RegisterSwimmerWizard(models.TransientModel):
+    _name = "natacion.register.swimmer.wizard"
+    _description = "Wizard de inscripción de nadadores"
 
+    championship_id = fields.Many2one(
+        "natacion.championship",
+        required=True,
+        readonly=True
+    )
 
+    swimmer_id = fields.Many2one(
+        "res.partner",
+        required=True,
+        domain="[('is_swimmer', '=', True)]",
+        string="Nadador"
+    )
 
+    membership_ok = fields.Boolean(
+        compute="_compute_membership_ok",
+        string="Cuota pagada"
+    )
 
+    @api.depends("swimmer_id")
+    def _compute_membership_ok(self):
+        today = date.today()
+        for w in self:
+            w.membership_ok = bool(
+                w.swimmer_id.membership_end_date
+                and w.swimmer_id.membership_end_date >= today
+            )
 
+    @api.onchange("swimmer_id")
+    def _onchange_swimmer(self):
+        if self.swimmer_id and not self.membership_ok:
+            return {
+                "warning": {
+                    "title": "Cuota no pagada",
+                    "message": "Este nadador no tiene la cuota anual pagada."
+                }
+            }
 
+    def action_confirm(self):
+        self.ensure_one()
 
+        if not self.membership_ok:
+            raise UserError("No se puede inscribir un nadador sin la cuota pagada.")
 
+        championship = self.championship_id
 
+        # Evitar duplicados
+        if self.swimmer_id in championship.swimmers:
+            raise UserError("Este nadador ya está inscrito en el campeonato.")
+
+        # Añadir como nadador independiente
+        championship.independent_swimmers = [(4, self.swimmer_id.id)]
