@@ -2,7 +2,7 @@
 
 from datetime import date
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class Club(models.Model):
@@ -183,11 +183,9 @@ class championship(models.Model):
     name = fields.Char(required=True)
     clubs = fields.Many2many("natacion.club")
 
+    # Nadadores independientes, se añaden solo desde el wizard
     independent_swimmers = fields.Many2many(
         "res.partner",
-        compute="_compute_independent_swimmers",
-        store=True,
-        readonly=True,
         string="Nadadores independientes"
     )
 
@@ -200,24 +198,14 @@ class championship(models.Model):
 
     start_date = fields.Datetime(required=True)
     end_date = fields.Datetime()
-    sessions = fields.One2many("natacion.session", "championship_id", ondelete="cascade")
-
-    @api.depends("sessions.swimmers")
-    def _compute_independent_swimmers(self):
-        for record in self:
-            swimmers = record.sessions.mapped("swimmers")
-            record.independent_swimmers = swimmers
-
+    sessions = fields.One2many("natacion.session", "championship_id")
 
     @api.depends("clubs", "clubs.swimmers_list", "independent_swimmers")
     def _compute_swimmers(self):
         for record in self:
             club_swimmers = record.clubs.mapped("swimmers_list")
             record.swimmers = club_swimmers | record.independent_swimmers
-
-
-
-            
+         
 class session(models.Model):
     _name = "natacion.session"
     _description = "Sesión de natación"
@@ -226,7 +214,7 @@ class session(models.Model):
     date = fields.Datetime()
     sessionTime = fields.Integer(compute="_compute_sessionTime", store=True, readonly=True)
     championship_id = fields.Many2one("natacion.championship", ondelete="set null")
-    tests = fields.One2many("natacion.test", "session_id", ondelete="cascade")
+    tests = fields.One2many("natacion.test", "session_id")
     swimmers = fields.Many2many(
     "res.partner",
     compute="_compute_swimmers",
@@ -354,12 +342,103 @@ class result(models.Model):
         readonly=True
     )
 
-    @api.model
-    def create(self, vals):
-        result = super().create(vals)
-        result._update_swimmer_best_time()
-        result._update_club_points()
-        return result
+    # =====================
+    # Onchange para nadador
+    # =====================
+    @api.onchange("swimmer_id")
+    def _onchange_swimmer_id_validate(self):
+        if not self.swimmer_id or not self.set_id:
+            return
+
+        championship = self.set_id.test_id.session_id.championship_id
+        if championship and self.swimmer_id not in championship.swimmers:
+            self.swimmer_id = False
+            return {
+                "warning": {
+                    "title": "Nadador no inscrito",
+                    "message": "Este nadador no está inscrito en el campeonato y no puede agregarse al resultado.",
+                }
+            }
+
+        # Onchange para categoría
+        swimmer_cat = self.swimmer_id.category
+        test_cat = self.set_id.test_id.category_id
+        if swimmer_cat and test_cat and swimmer_cat != test_cat:
+            self.swimmer_id = False
+            return {
+                "warning": {
+                    "title": "Categoría incorrecta",
+                    "message": f"El nadador no pertenece a la categoría '{test_cat.name}'.",
+                }
+            }
+
+    # =====================
+    # Onchange para set_id (dominio nadadores)
+    # =====================
+    @api.onchange("set_id")
+    def _onchange_set_id(self):
+        if not self.set_id:
+            return {}
+
+        test = self.set_id.test_id
+        session = test.session_id if test else False
+        championship = session.championship_id if session else False
+
+        if not championship:
+            return {}
+
+        # Filtrar solo nadadores del campeonato y de la misma categoría
+        test_cat_id = test.category_id.id if test.category_id else False
+        swimmers_ids = [
+            s.id for s in championship.swimmers
+            if not test_cat_id or s.category.id == test_cat_id
+        ]
+
+        return {
+            "domain": {
+                "swimmer_id": [("id", "in", swimmers_ids)]
+            }
+        }
+
+    # =====================
+    # Constraints
+    # =====================
+    @api.constrains("swimmer_id", "test_id")
+    def _check_swimmer_in_championship(self):
+        for rec in self:
+            if not rec.test_id or not rec.swimmer_id:
+                continue
+
+            championship = rec.test_id.session_id.championship_id
+            if championship and rec.swimmer_id not in championship.swimmers:
+                raise ValidationError(
+                    "Este nadador no está inscrito en el campeonato."
+                )
+
+    @api.constrains("swimmer_id", "set_id")
+    def _check_swimmer_category(self):
+        for rec in self:
+            if not rec.swimmer_id or not rec.set_id:
+                continue
+            swimmer_cat = rec.swimmer_id.category
+            test_cat = rec.set_id.test_id.category_id
+            if swimmer_cat and test_cat and swimmer_cat != test_cat:
+                raise ValidationError(
+                    f"El nadador '{rec.swimmer_id.name}' pertenece a la categoría "
+                    f"'{swimmer_cat.name}' y no puede añadirse a un test de "
+                    f"categoría '{test_cat.name}'."
+                )
+
+    # =====================
+    # Métodos de creación y escritura
+    # =====================
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            rec._update_swimmer_best_time()
+            rec._update_club_points()
+        return records
 
     def write(self, vals):
         res = super().write(vals)
@@ -368,6 +447,9 @@ class result(models.Model):
             record._update_club_points()
         return res
 
+    # =====================
+    # Actualización de nadador y club
+    # =====================
     def _update_swimmer_best_time(self):
         swimmer = self.swimmer_id
         test = self.test_id
@@ -393,6 +475,9 @@ class result(models.Model):
 
             swimmer.club.points = swimmer.club.points + int(points)
 
+    # =====================
+    # Unlink
+    # =====================
     def unlink(self):
         swimmers_to_update = self.mapped("swimmer_id")
         res = super().unlink()
@@ -411,8 +496,6 @@ class result(models.Model):
                 swimmer.bestStyle = False
 
         return res
-
-
 
 class RegisterSwimmerWizard(models.TransientModel):
     _name = "natacion.register.swimmer.wizard"
@@ -445,27 +528,62 @@ class RegisterSwimmerWizard(models.TransientModel):
                 and w.swimmer_id.membership_end_date >= today
             )
 
-    @api.onchange("swimmer_id")
-    def _onchange_swimmer(self):
-        if self.swimmer_id and not self.membership_ok:
-            return {
-                "warning": {
-                    "title": "Cuota no pagada",
-                    "message": "Este nadador no tiene la cuota anual pagada."
-                }
-            }
-
     def action_confirm(self):
         self.ensure_one()
-
         if not self.membership_ok:
             raise UserError("No se puede inscribir un nadador sin la cuota pagada.")
 
-        championship = self.championship_id
+        return {
+            "name": "Detalles del Nadador",
+            "type": "ir.actions.act_window",
+            "res_model": "natacion.confirm.swimmer.details.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_swimmer_id": self.swimmer_id.id,
+                "default_championship_id": self.championship_id.id,
+                "default_category_id": self.swimmer_id.category.id if self.swimmer_id.category else False,
+                "default_bestStyle_id": self.swimmer_id.bestStyle.id if self.swimmer_id.bestStyle else False,
+            }
+        }
 
-        # Evitar duplicados
-        if self.swimmer_id in championship.swimmers:
-            raise UserError("Este nadador ya está inscrito en el campeonato.")
 
-        # Añadir como nadador independiente
-        championship.independent_swimmers = [(4, self.swimmer_id.id)]
+class ConfirmSwimmerDetailsWizard(models.TransientModel):
+    _name = "natacion.confirm.swimmer.details.wizard"
+    _description = "Wizard para confirmar categoría y mejor estilo del nadador"
+
+    championship_id = fields.Many2one(
+        "natacion.championship",
+        required=True,
+        readonly=True
+    )
+
+    swimmer_id = fields.Many2one(
+        "res.partner",
+        required=True,
+        readonly=True
+    )
+
+    category_id = fields.Many2one(
+        "natacion.category",
+        string="Categoría"
+    )
+
+    bestStyle_id = fields.Many2one(
+        "natacion.style",
+        string="Mejor Estilo"
+    )
+
+    def action_confirm(self):
+        self.ensure_one()
+        swimmer = self.swimmer_id
+
+        if self.category_id:
+            swimmer.category = self.category_id
+        if self.bestStyle_id:
+            swimmer.bestStyle = self.bestStyle_id
+
+        if swimmer not in self.championship_id.swimmers:
+            self.championship_id.independent_swimmers = [(4, swimmer.id)]
+
+        return {"type": "ir.actions.client", "tag": "reload"}
