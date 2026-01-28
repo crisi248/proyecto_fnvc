@@ -288,13 +288,92 @@ class championship(models.Model):
         for championship in self:
             for session in championship.sessions:
                 for test in session.tests:
-                    for set_line in test.sets:  # Cada set dentro del test
-                        for result in set_line.results:  # Cada resultado dentro del set
+                    for set_line in test.sets:  
+                        for result in set_line.results: 
                             result.time = round(random.uniform(10, 30), 2)
-                            # Actualizamos mejor tiempo y estilo del nadador
                             result._update_swimmer_best_time()
                             result._update_club_points()
         return True
+    
+class CreateChampionshipWizard(models.TransientModel):
+    _name = "natacion.create.championship.wizard"
+    _description = "Wizard para crear campeonato - Datos Básicos"
+
+    name = fields.Char(string="Nombre del Campeonato", required=True)
+    start_date = fields.Date(string="Fecha de Inicio", required=True)
+    end_date = fields.Date(string="Fecha de Fin", required=True)
+
+    @api.onchange("start_date")
+    def _onchange_start_date(self):
+        if self.start_date:
+            self.end_date = self.start_date + timedelta(days=6*30)
+
+    def action_next(self):
+        self.ensure_one()
+        return {
+            "name": "Configuración de Sesiones y Tests",
+            "type": "ir.actions.act_window",
+            "res_model": "natacion.create.championship.details.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_name": self.name,
+                "default_start_date": self.start_date,
+                "default_end_date": self.end_date,
+            },
+        }
+    
+class CreateChampionshipDetailsWizard(models.TransientModel):
+    _name = "natacion.create.championship.details.wizard"
+    _description = "Wizard para configurar sesiones, tests y sets"
+
+    name = fields.Char(string="Nombre del Campeonato", required=True, readonly=True)
+    start_date = fields.Date(string="Fecha de Inicio", required=True, readonly=True)
+    end_date = fields.Date(string="Fecha de Fin", required=True, readonly=True)
+
+    number_of_sessions = fields.Integer(string="Número de Sesiones", default=5)
+
+    def action_create_championship(self):
+        """Crea el campeonato y las sesiones, tests y sets"""
+        self.ensure_one()
+        env = self.env
+
+        # 1️⃣ Crear el campeonato
+        championship = env["natacion.championship"].create({
+            "name": self.name,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+        })
+
+        # 2️⃣ Crear sesiones
+        for i in range(1, self.number_of_sessions + 1):
+            session = env["natacion.session"].create({
+                "name": f"Sesion{i}",
+                "date": fields.Datetime.now() + timedelta(weeks=i),
+                "championship_id": championship.id,
+            })
+
+            # 3️⃣ Crear tests de todas las combinaciones de estilo y categoría
+            styles = env["natacion.style"].search([])
+            categories = env["natacion.category"].search([])
+
+            for style in styles:
+                for category in categories:
+                    env["natacion.test"].create({
+                        "name": f"Test - {style.name}/{category.name}",
+                        "session_id": session.id,
+                        "style_id": style.id,
+                        "category_id": category.id,
+                    })
+
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "natacion.championship",
+            "view_mode": "form",
+            "res_id": championship.id,
+            "target": "current",
+        }
+
          
 class session(models.Model):
     _name = "natacion.session"

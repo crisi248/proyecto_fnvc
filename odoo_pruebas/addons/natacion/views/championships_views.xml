@@ -2,6 +2,70 @@
   <data>
 
     <!-- ===================== -->
+    <!-- WIZARD 1: CREAR CAMPEONATO -->
+    <!-- ===================== -->
+
+    <!-- Acción del wizard 1 -->
+    <record id="action_create_championship_wizard" model="ir.actions.act_window">
+      <field name="name">Crear Campeonato</field>
+      <field name="res_model">natacion.create.championship.wizard</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <!-- Vista del wizard 1 -->
+    <record id="view_create_championship_wizard_form" model="ir.ui.view">
+      <field name="name">create.championship.wizard.form</field>
+      <field name="model">natacion.create.championship.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Crear Campeonato">
+          <group>
+            <field name="name" />
+            <field name="start_date" />
+            <field name="end_date" readonly="1" />
+          </group>
+          <footer>
+            <button string="Siguiente" type="object" name="action_next" class="btn-primary" />
+            <button string="Cancelar" special="cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <!-- ===================== -->
+    <!-- WIZARD 2: CONFIGURAR SESIONES, TESTS Y SETS -->
+    <!-- ===================== -->
+
+    <!-- Acción del wizard 2 -->
+    <record id="action_create_championship_details_wizard" model="ir.actions.act_window">
+      <field name="name">Configurar Sesiones y Tests</field>
+      <field name="res_model">natacion.create.championship.details.wizard</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <!-- Vista del wizard 2 -->
+    <record id="view_create_championship_details_wizard_form" model="ir.ui.view">
+      <field name="name">create.championship.details.wizard.form</field>
+      <field name="model">natacion.create.championship.details.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Configurar Sesiones, Tests y Sets">
+          <group>
+            <field name="name" readonly="1" />
+            <field name="start_date" readonly="1" />
+            <field name="end_date" readonly="1" />
+            <field name="number_of_sessions" />
+          </group>
+          <footer>
+            <button string="Crear Campeonato" type="object" name="action_create_championship"
+              class="btn-primary" />
+            <button string="Cancelar" special="cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <!-- ===================== -->
     <!-- WIZARD 1 ACTION -->
     <!-- ===================== -->
     <record id="action_register_swimmer_wizard" model="ir.actions.act_window">
@@ -69,6 +133,13 @@
       <field name="model">natacion.championship</field>
       <field name="arch" type="xml">
         <list string="Championships">
+          <header>
+            <button name="%(natacion.action_create_championship_wizard)d"
+              type="action"
+              string="Crear Campeonato"
+              class="btn-primary"
+              display="always" />
+          </header>
           <field name="name" />
           <field name="start_date" />
           <field name="end_date" />
@@ -107,10 +178,10 @@
                 class="btn-primary"
                 display="always" />
 
-                <button name="action_assign_random_times"
-                    string="Asignar Resultados"
-                    type="object"
-                    class="btn-primary"/>
+              <button name="action_assign_random_times"
+                string="Asignar Resultados"
+                type="object"
+                class="btn-primary" />
 
             </header>
             <group>
