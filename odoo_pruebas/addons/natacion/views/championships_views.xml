@@ -20,11 +20,11 @@
       <field name="arch" type="xml">
         <form string="Inscribir Nadador">
           <group>
-            <field name="swimmer_id"/>
+            <field name="swimmer_id" />
           </group>
           <footer>
-            <button string="Confirmar" type="object" name="action_confirm" class="btn-primary"/>
-            <button string="Cancelar" special="cancel"/>
+            <button string="Confirmar" type="object" name="action_confirm" class="btn-primary" />
+            <button string="Cancelar" special="cancel" />
           </footer>
         </form>
       </field>
@@ -49,13 +49,13 @@
       <field name="arch" type="xml">
         <form string="Detalles del Nadador">
           <group>
-            <field name="swimmer_id" readonly="1"/>
-            <field name="category_id"/>
-            <field name="bestStyle_id"/>
+            <field name="swimmer_id" readonly="1" />
+            <field name="category_id" />
+            <field name="bestStyle_id" />
           </group>
           <footer>
-            <button string="Confirmar" type="object" name="action_confirm" class="btn-primary"/>
-            <button string="Cancelar" special="cancel"/>
+            <button string="Confirmar" type="object" name="action_confirm" class="btn-primary" />
+            <button string="Cancelar" special="cancel" />
           </footer>
         </form>
       </field>
@@ -69,11 +69,11 @@
       <field name="model">natacion.championship</field>
       <field name="arch" type="xml">
         <list string="Championships">
-          <field name="name"/>
-          <field name="start_date"/>
-          <field name="end_date"/>
-          <field name="clubs" widget="many2many_tags"/>
-          <field name="swimmers" widget="many2many_tags"/>
+          <field name="name" />
+          <field name="start_date" />
+          <field name="end_date" />
+          <field name="clubs" widget="many2many_tags" />
+          <field name="swimmers" widget="many2many_tags" />
         </list>
       </field>
     </record>
@@ -89,25 +89,44 @@
           <sheet>
             <header>
               <button name="%(natacion.action_register_swimmer_wizard)d"
-                      type="action"
-                      string="Inscribir Nadador"
-                      class="btn-primary"
-                      context="{'default_championship_id': id}" />
+                type="action"
+                string="Inscribir Nadador"
+                class="btn-primary"
+                context="{'default_championship_id': id}" />
+
+
+              <button name="action_random_setup"
+                type="object"
+                string="PUPULATE"
+                class="btn-primary"
+                display="always" />
+
+              <button name="action_assign_swimmers_to_tests"
+                type="object"
+                string="Asignar Nadadores a Tests"
+                class="btn-primary"
+                display="always" />
+
+                <button name="action_assign_random_times"
+                    string="Asignar Resultados"
+                    type="object"
+                    class="btn-primary"/>
+
             </header>
             <group>
-              <field name="name"/>
-              <field name="start_date"/>
-              <field name="end_date"/>
-              <field name="clubs" widget="many2many_tags"/>
-              <field name="swimmers" widget="many2many_tags" readonly="1"/>
+              <field name="name" />
+              <field name="start_date" />
+              <field name="end_date" />
+              <field name="clubs" widget="many2many_tags" />
+              <field name="swimmers" widget="many2many_tags" readonly="1" />
             </group>
             <notebook>
               <page string="Sessions">
                 <field name="sessions">
                   <list>
-                    <field name="name"/>
-                    <field name="date"/>
-                    <field name="sessionTime"/>
+                    <field name="name" />
+                    <field name="date" />
+                    <field name="sessionTime" />
                   </list>
                 </field>
               </page>
@@ -127,9 +146,9 @@
     </record>
 
     <menuitem name="Championships"
-              id="natacion.menu_championships"
-              parent="natacion.menu_management"
-              action="natacion.action_championships_window"/>
+      id="natacion.menu_championships"
+      parent="natacion.menu_management"
+      action="natacion.action_championships_window" />
 
   </data>
 </odoo>

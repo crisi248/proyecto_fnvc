@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
+import random, math
 
 
 class Club(models.Model):
@@ -205,6 +206,95 @@ class championship(models.Model):
         for record in self:
             club_swimmers = record.clubs.mapped("swimmers_list")
             record.swimmers = club_swimmers | record.independent_swimmers
+
+    def action_random_setup(self):
+        self.ensure_one()
+        
+        # Seleccionar clubs
+        all_clubs = self.env["natacion.club"].search([])
+        if len(all_clubs) < 3:
+            raise UserError("No hay suficientes clubs para seleccionar 3 aleatoriamente.")
+        
+        selected_clubs = random.sample(all_clubs, 3)
+        self.clubs = [(6, 0, [c.id for c in selected_clubs])]
+
+        # Crear 5 sesiones
+        now = datetime.now()
+        for i in range(5):
+            session_name = f"Sesion{i+1}"
+            session_date = now + timedelta(weeks=i+1)
+            session_rec = self.env["natacion.session"].create({
+                "name": session_name,
+                "date": session_date,
+                "championship_id": self.id,
+            })
+
+            # Crear tests
+            styles = self.env["natacion.style"].search([])
+            categories = self.env["natacion.category"].search([])
+
+            for style in styles:
+                for category in categories:
+                    test_name = f"Test - {style.name}/{category.name}"
+                    self.env["natacion.test"].create({
+                        "name": test_name,
+                        "style_id": style.id,
+                        "category_id": category.id,
+                        "session_id": session_rec.id,
+                    })
+        return True
+    
+
+    def action_assign_swimmers_to_tests(self):
+        for championship in self:
+            for session in championship.sessions:
+                for test in session.tests:
+
+                    category = test.category_id
+                    swimmers_in_cat = championship.swimmers.filtered(lambda s: s.category == category)
+
+                    if not swimmers_in_cat:
+                        continue
+
+                    num_swimmers = len(swimmers_in_cat)
+                    sets_needed = math.ceil(num_swimmers / 6)
+
+                    swimmer_index = 0
+
+                    for set_num in range(1, sets_needed + 1):
+                        set_record = self.env["natacion.set"].create({
+                            "name": f"Set{set_num}",
+                            "test_id": test.id,
+                        })
+
+
+                        for _ in range(6):
+                            if swimmer_index >= num_swimmers:
+                                break
+                            swimmer = swimmers_in_cat[swimmer_index]
+                            self.env["natacion.result"].create({
+                                "set_id": set_record.id,
+                                "swimmer_id": swimmer.id,
+                                "time": 0.0,
+                            })
+                            swimmer_index += 1
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "reload",
+        }
+    
+    def action_assign_random_times(self):
+        for championship in self:
+            for session in championship.sessions:
+                for test in session.tests:
+                    for set_line in test.sets:  # Cada set dentro del test
+                        for result in set_line.results:  # Cada resultado dentro del set
+                            result.time = round(random.uniform(10, 30), 2)
+                            # Actualizamos mejor tiempo y estilo del nadador
+                            result._update_swimmer_best_time()
+                            result._update_club_points()
+        return True
          
 class session(models.Model):
     _name = "natacion.session"
