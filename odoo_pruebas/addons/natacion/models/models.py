@@ -3,7 +3,7 @@
 from datetime import date, datetime, timedelta
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
-import random, math
+import random, math, json
 
 
 class Club(models.Model):
@@ -201,6 +201,55 @@ class championship(models.Model):
     end_date = fields.Datetime()
     sessions = fields.One2many("natacion.session", "championship_id")
 
+    results_html = fields.Html(
+        string="Resultados por Sesión/Test",
+        compute="_compute_results_html",
+        readonly=True
+    )
+
+    @api.depends("sessions.tests.sets.results", "sessions.tests.results_json")
+    def _compute_results_html(self):
+        for championship in self:
+            html = "<div style='font-family: Arial, sans-serif;'>"
+            for session in championship.sessions:
+                html += f'<details><summary style="font-weight:bold; font-size:14px; cursor:pointer; margin-bottom:5px;">Sesión: {session.name} ({session.date.strftime("%Y-%m-%d") if session.date else "Sin fecha"})</summary>'
+                for test in session.tests:
+                    html += f'<details style="margin-left:20px;"><summary style="font-style:italic; cursor:pointer;">Test: {test.name}</summary>'
+                    html += '''
+                    <table style="
+                        border-collapse: collapse;
+                        width: 80%;
+                        margin-left: 20px;
+                        margin-top: 5px;
+                        margin-bottom: 10px;
+                        font-size: 13px;
+                    ">
+                        <thead>
+                            <tr style="background-color: #0074D9; color: white;">
+                                <th style="padding: 6px; text-align: left; border-radius: 4px 0 0 0;">Nombre</th>
+                                <th style="padding: 6px; text-align: right; border-radius: 0 4px 0 0;">Tiempo (s)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    '''
+                    
+                    try:
+                        results = json.loads(test.results_json or "[]")
+                    except Exception:
+                        results = []
+
+                    for i, res in enumerate(results):
+                        bg_color = "#f2f2f2" if i % 2 == 0 else "#ffffff"
+                        nombre = res.get("swimmer", "")
+                        tiempo = res.get("time", "")
+                        html += f'<tr style="background-color:{bg_color};"><td style="padding:6px;">{nombre}</td><td style="padding:6px; text-align:right;">{tiempo}</td></tr>'
+                    
+                    html += '</tbody></table></details>'
+                html += '</details>'
+            html += "</div>"
+            championship.results_html = html
+
+
     @api.depends("clubs", "clubs.swimmers_list", "independent_swimmers")
     def _compute_swimmers(self):
         for record in self:
@@ -300,13 +349,18 @@ class CreateChampionshipWizard(models.TransientModel):
     _description = "Wizard para crear campeonato - Datos Básicos"
 
     name = fields.Char(string="Nombre del Campeonato", required=True)
-    start_date = fields.Date(string="Fecha de Inicio", required=True)
+    start_date = fields.Date(
+        string="Fecha de Inicio",
+        required=True,
+        default=fields.Date.context_today
+    )
     end_date = fields.Date(string="Fecha de Fin", required=True)
 
     @api.onchange("start_date")
     def _onchange_start_date(self):
-        if self.start_date:
-            self.end_date = self.start_date + timedelta(days=6*30)
+        if self.start_date and not self.end_date:
+            # Solo calcula si el usuario aún no tocó end_date
+            self.end_date = self.start_date + timedelta(days=6 * 30)
 
     def action_next(self):
         self.ensure_one()
@@ -332,9 +386,13 @@ class CreateChampionshipDetailsWizard(models.TransientModel):
     end_date = fields.Date(string="Fecha de Fin", required=True, readonly=True)
 
     number_of_sessions = fields.Integer(string="Número de Sesiones", default=5)
+    club_ids = fields.Many2many(
+        "natacion.club",
+        string="Clubs Participantes"
+    )
 
     def action_create_championship(self):
-        """Crea el campeonato y las sesiones, tests y sets"""
+        """Crea el campeonato, sesiones, tests, sets y clubs"""
         self.ensure_one()
         env = self.env
 
@@ -343,6 +401,7 @@ class CreateChampionshipDetailsWizard(models.TransientModel):
             "name": self.name,
             "start_date": self.start_date,
             "end_date": self.end_date,
+            "clubs": [(6, 0, self.club_ids.ids)],
         })
 
         # 2️⃣ Crear sesiones
@@ -441,10 +500,31 @@ class test(models.Model):
     description = fields.Char()
     style_id = fields.Many2one("natacion.style", ondelete="set null")
     category_id = fields.Many2one("natacion.category", ondelete="set null")
-    swimmers = fields.Many2many("res.partner",compute="_compute_swimmers",store=True,readonly=True)
+    swimmers = fields.Many2many("res.partner", compute="_compute_swimmers", store=True, readonly=True)
     sets = fields.One2many("natacion.set", "test_id", ondelete="cascade")
     session_id = fields.Many2one("natacion.session")
     timeTest = fields.Integer(compute="_compute_timeTest", store=True, readonly=True)
+
+    # 👉 Nuevo campo JSON
+    results_json = fields.Char(
+        string="Resultados (JSON)",
+        compute="_compute_results_json",
+        store=True,
+        readonly=True
+    )
+
+    @api.depends("sets.results.swimmer_id", "sets.results.time")
+    def _compute_results_json(self):
+        for record in self:
+            results_list = []
+            for set_rec in record.sets:
+                for res in set_rec.results:
+                    if res.swimmer_id and res.time:
+                        results_list.append({
+                            "swimmer": res.swimmer_id.name,
+                            "time": res.time,
+                        })
+            record.results_json = json.dumps(results_list)
 
     @api.depends("sets.results.swimmer_id")
     def _compute_swimmers(self):

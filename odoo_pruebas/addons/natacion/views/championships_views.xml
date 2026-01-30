@@ -22,7 +22,7 @@
           <group>
             <field name="name" />
             <field name="start_date" />
-            <field name="end_date" readonly="1" />
+            <field name="end_date"/>
           </group>
           <footer>
             <button string="Siguiente" type="object" name="action_next" class="btn-primary" />
@@ -55,6 +55,7 @@
             <field name="start_date" readonly="1" />
             <field name="end_date" readonly="1" />
             <field name="number_of_sessions" />
+            <field name="club_ids" widget="many2many_tags"/>
           </group>
           <footer>
             <button string="Crear Campeonato" type="object" name="action_create_championship"
@@ -200,6 +201,9 @@
                     <field name="sessionTime" />
                   </list>
                 </field>
+              </page>
+              <page string="Resultados">
+                <field name="results_html"/>
               </page>
             </notebook>
           </sheet>
