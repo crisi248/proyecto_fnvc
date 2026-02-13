@@ -22,6 +22,20 @@
         <form string="Session">
           <sheet>
             <group>
+              <header>
+                <button name="action_print_session_results_pdf"
+                  type="object"
+                  string="Imprimir Resultados PDF"
+                  class="btn-primary" />
+
+                <button
+                  name="action_print_tickets"
+                  type="object"
+                  string="Generar Entradas (PDF)"
+                  class="btn-primary"
+                  icon="fa-ticket" />
+
+              </header>
               <field name="name" />
               <field name="date" />
               <field name="sessionTime" />

@@ -3,7 +3,9 @@
 from datetime import date, datetime, timedelta
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
-import random, math, json
+import random, math, json, logging
+
+_logger = logging.getLogger(__name__)
 
 
 class Club(models.Model):
@@ -443,11 +445,40 @@ class session(models.Model):
     sessionTime = fields.Integer(compute="_compute_sessionTime", store=True, readonly=True)
     championship_id = fields.Many2one("natacion.championship", ondelete="set null")
     tests = fields.One2many("natacion.test", "session_id")
+
     swimmers = fields.Many2many(
     "res.partner",
     compute="_compute_swimmers",
     store=True,
     readonly=True)
+
+    ticket_ids = fields.One2many("natacion.session.ticket", "session_id")
+
+    #Reports
+    def action_print_session_results_pdf(self):
+        self.ensure_one()
+        return self.env.ref("natacion.action_resultados_report").report_action(self)
+    
+    def action_print_tickets(self):
+        self.ensure_one()
+
+        _logger.warning("SESSION ID: %s", self.id)
+
+        # 1️⃣ Borrar tickets anteriores
+        self.ticket_ids.unlink()
+
+        # 2️⃣ Crear tickets nuevos
+        tickets = []
+        for i in range(1, 25):
+            tickets.append({
+                'session_id': self.id,
+                'number': i,
+            })
+        self.env['natacion.session.ticket'].create(tickets)
+
+        # 3️⃣ Imprimir PDF
+        return self.env.ref('natacion.action_report_session_tickets').report_action(self)
+
 
     @api.depends("tests.swimmers")
     def _compute_swimmers(self):
@@ -491,6 +522,24 @@ class session(models.Model):
                         raise ValidationError(
                             "Ya existe otra sesión en este campeonato con la misma fecha (%s)." % session_date
                         )
+                    
+class ticket(models.Model):
+    _name = "natacion.session.ticket"
+    _description = "Entradas de sesión"
+
+    session_id = fields.Many2one("natacion.session", required=True)
+    number = fields.Integer(string="Número de entrada", required=True)
+    code = fields.Char(string="Código", compute="_compute_code", store=True)
+
+    @api.depends("session_id", "number")
+    def _compute_code(self):
+        for rec in self:
+            if rec.session_id and rec.number:
+                rec.code = "S%s-T%s" % (rec.session_id.id, rec.number)
+            else:
+                rec.code = ""
+
+
 
 class test(models.Model):
     _name = "natacion.test"
@@ -505,7 +554,6 @@ class test(models.Model):
     session_id = fields.Many2one("natacion.session")
     timeTest = fields.Integer(compute="_compute_timeTest", store=True, readonly=True)
 
-    # 👉 Nuevo campo JSON
     results_json = fields.Char(
         string="Resultados (JSON)",
         compute="_compute_results_json",

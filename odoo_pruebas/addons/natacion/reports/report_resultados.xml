@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Template del reporte de resultados por sesión -->
+    <template id="report_resultados">
+        <t t-call="web.html_container">
+
+            <!-- Definimos la variable session desde docs[0] -->
+            <t t-set="session" t-value="docs[0]"/>
+
+            <t t-call="web.external_layout">
+                
+                <!-- Título del reporte -->
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h1 style="font-family: Arial, sans-serif; font-weight:bold; font-size:20px;">
+                            Resultados de la sesión: <t t-esc="session.name"/>
+                        </h1>
+                        <p style="font-family: Arial, sans-serif; font-size:13px; color: #555;">
+                            Fecha: <t t-esc="session.date.strftime('%d/%m/%Y %H:%M') if session.date else 'Sin fecha'"/>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Iteramos por cada test de la sesión -->
+                <t t-foreach="session.tests" t-as="test">
+                    <div class="page">
+                        <!-- Nombre del test -->
+                        <h3 style="font-family: Arial, sans-serif; font-weight:bold; font-size:16px; margin-bottom:10px;">
+                            <t t-esc="test.name"/>
+                        </h3>
+
+                        <!-- Tabla de resultados -->
+                        <table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size:13px; margin-bottom:20px;">
+                            <thead>
+                                <tr style="background-color: #0074D9; color: white;">
+                                    <th style="padding:6px; text-align:left; border-radius:4px 0 0 0;">Nombre</th>
+                                    <th style="padding:6px; text-align:right; border-radius:0 4px 0 0;">Tiempo (s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="test.sets" t-as="serie">
+                                    <t t-foreach="serie.results" t-as="res">
+                                        <tr t-att-style="'background-color: %s;' % ('#f2f2f2' if res_even else '#ffffff')">
+                                            <td style="padding:6px;"><t t-esc="res.swimmer_id.name"/></td>
+                                            <td style="padding:6px; text-align:right;"><t t-esc="res.time"/></td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Salto de página para el siguiente test -->
+                        <div style="page-break-after: always;"></div>
+                    </div>
+                </t>
+
+                <!-- Pie de página con fecha de generación -->
+                <div class="row mt-5">
+                    <div class="col-12 text-center text-muted">
+                        <hr/>
+                        <p>
+                            <small>
+                                Reporte generado el <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y a las %H:%M')"/>
+                            </small>
+                        </p>
+                    </div>
+                </div>
+
+            </t>
+        </t>
+    </template>
+
+    <!-- Paper Format -->
+    <record id="paperformat_session_report" model="report.paperformat">
+        <field name="name">Championship Report Format</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">40</field>
+        <field name="margin_bottom">25</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">35</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Acción del reporte -->
+    <record id="action_resultados_report" model="ir.actions.report">
+        <field name="name">Resultados de la sesión</field>
+        <field name="model">natacion.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">natacion.report_resultados</field>
+        <field name="report_file">natacion.report_resultados</field>
+        <field name="print_report_name">'Resultados Sesion - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_natacion_session"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_session_report"/>
+    </record>
+
+</odoo>

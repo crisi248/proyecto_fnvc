@@ -11,4 +11,5 @@ access_natacion_register_swimmer_wizard,natacion.register.swimmer.wizard,model_n
 access_natacion_confirm_swimmer_details_wizard,natacion.confirm.swimmer.details.wizard,model_natacion_confirm_swimmer_details_wizard,base.group_user,1,1,1,1
 access_natacion_create_championship_wizard,natacion.create.championship.wizard,model_natacion_create_championship_wizard,base.group_user,1,1,1,1
 access_natacion_create_championship_details_wizard,natacion.create.championship.details.wizard,model_natacion_create_championship_details_wizard,base.group_user,1,1,1,1
+access_natacion_session_ticket,natacion.session.ticket,model_natacion_session_ticket,base.group_user,1,1,1,1
 

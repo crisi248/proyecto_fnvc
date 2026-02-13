@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_session_tickets">
+        <t t-call="web.html_container">
+            <t t-set="session" t-value="docs[0]" />
+            <t t-set="base_url"
+                t-value="env['ir.config_parameter'].sudo().get_param('web.base.url')" />
+            <t t-set="company" t-value="env.user.company_id" />
+
+            <t t-foreach="session.ticket_ids" t-as="ticket">
+                <div class="page"
+                    style="page-break-after: always; font-family: Arial, sans-serif; padding: 2mm;">
+
+                    <!-- Logo -->
+                    <div style="margin-bottom:1mm;">
+                        <img t-attf-src="data:image/*;base64,{{company.logo}}"
+                            style="max-height:18mm; max-width:50mm;" />
+                    </div>
+
+                    <!-- Nombre de la sesión -->
+                    <div style="font-size:12px; font-weight:bold; margin-bottom:0.8mm;">
+                        <t t-esc="session.name" />
+                    </div>
+
+                    <!-- Número de ticket -->
+                    <div style="font-size:11px; margin-bottom:1mm;"> Entrada nº <strong>
+                            <t t-esc="ticket.number" />
+                        </strong>
+                    </div>
+
+                    <!-- QR -->
+                    <div style="margin-bottom:1mm;">
+                        <img
+                            t-att-src=" base_url + '/report/barcode/QR/' + (session.name + ' - Ticket ' + session.name)"
+                            style="width:28mm; height:28mm;" />
+                    </div>
+
+                    <!-- Pie -->
+                    <div style="font-size:7px; color:#555;">
+                        <hr style="margin:0.5mm 0;" />
+                        <p style="margin:0;"> Generado el <t
+                                t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')" />
+                        </p>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+
+    <record id="paperformat_ticket" model="report.paperformat">
+        <field name="name">Ticket 20x5 cm</field>
+        <field name="format">custom</field>   <!-- obligatorio, aunque no sea A4 real -->
+        <field name="default" eval="False" />
+        <field name="orientation">Portrait</field>
+        <field name="page_height">60</field> 
+        <field name="page_width">100</field>  
+        <field name="margin_top">2</field>
+        <field name="margin_bottom">2</field>
+        <field name="margin_left">2</field>
+        <field name="margin_right">2</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Acción del reporte -->
+    <record id="action_report_session_tickets" model="ir.actions.report">
+        <field name="name">Entradas de sesión</field>
+        <field name="model">natacion.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">natacion.report_session_tickets</field>
+        <field name="report_file">natacion.report_session_tickets</field>
+        <field name="paperformat_id" ref="paperformat_ticket" />
+    </record>
+</odoo>

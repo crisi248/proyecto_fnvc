@@ -37,6 +37,9 @@ Long description of module's purpose
         'demo/clubs.xml',
         'demo/swimmers.xml',
         'demo/cuota.xml',
+        'reports/report_resultados.xml',
+        'reports/report_session_tickets.xml',
+        
     ],
     # only loaded in demonstration mode
     'demo': [
