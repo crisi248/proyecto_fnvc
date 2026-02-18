@@ -26,6 +26,21 @@ class Club(models.Model):
     medal = fields.Char(compute="_compute_medal", string="Medal Emoji", readonly=True)
     ranking = fields.Integer(compute="_compute_ranking", string="Ranking", readonly=True)
 
+    club_json = fields.Char(
+        string="Club (JSON)",
+        compute="_compute_club_json",
+        store=True,
+        readonly=True
+    )
+
+    @api.depends("name", "points")
+    def _compute_club_json(self):
+        for record in self:
+            record.club_json = json.dumps({
+                "club": record.name,
+                "points": record.points,
+            })
+
     @api.depends('points')
     def _compute_ranking(self):
         for club in self:
@@ -208,6 +223,80 @@ class championship(models.Model):
         compute="_compute_results_html",
         readonly=True
     )
+
+    def get_championship_json(self):
+        """✅ FIXED: JSON completo del campeonato"""
+        import json
+        
+        # Si no hay sesiones, devuelve JSON vacío
+        if not self.sessions:
+            return json.dumps({
+                "mensaje": "Sin sesiones ni resultados. Genera un campeonato aleatorio primero.",
+                "campeonato": {"nombre": self.name}
+            }, indent=2, ensure_ascii=False)
+
+        data = {
+            'campeonato': {
+                'nombre': self.name,
+                'fecha_inicio': str(self.start_date) if self.start_date else None,
+                'fecha_fin': str(self.end_date) if self.end_date else None,
+                'total_sesiones': len(self.sessions),
+                'total_clubs': len(self.clubs),
+                'total_nadadores': len(self.swimmers)
+            },
+            'sesiones': [],
+            'clasificacion': []
+        }
+
+        # ✅ Sesiones → Eventos → Series → Resultados
+        for session in self.sessions.sorted('date'):
+            session_data = {
+                'nombre': session.name,
+                'fecha': str(session.date),
+                'tests': []
+            }
+            for test in session.tests:
+                event_data = {
+                    'nombre': test.name,
+                    'series': []
+                }
+                for sets in test.sets:
+                    series_data = {
+                        'nombre': set.name,
+                        'resultados': []
+                    }
+                    for result in sets.results.sorted('time'):
+                        if result.swimmer_id:  # ✅ Verificación
+                            result_data = {
+                                'nadador': result.swimmer_id.name,
+                                'club': result.swimmer_id.club_id.name or 'Sin club',
+                                'tiempo': f"{result.time//100}.{result.time%100:02d}s",
+                            }
+                            series_data['resultados'].append(result_data)
+                    event_data['series'].append(series_data)
+                session_data['eventos'].append(event_data)
+            data['sesiones'].append(session_data)
+
+        # ✅ Clasificación FIXED - estructura plana
+        results = self.env['natacion.result'].search([
+            ('series_id.event_id.session_id.championship_id', '=', self.id),
+            ('swimmer_id', '!=', False)
+        ])
+        best_times = {}
+        for r in results:
+            tid = r.swimmer_id.id
+            t = r.time / 100.0
+            if tid not in best_times or t < best_times[tid]['time']:
+                best_times[tid] = {
+                    'nadador': r.swimmer_id.name,
+                    'club': r.swimmer_id.club_id.name or 'Sin club',
+                    'mejor_tiempo': f"{t:.2f}s",
+                    'time': t  # ✅ Añadido para comparación numérica
+                }
+        
+        data['clasificacion'] = sorted(best_times.values(), key=lambda x: x['time'])
+
+        return json.dumps(data, indent=2, ensure_ascii=False)
 
     @api.depends("sessions.tests.sets.results", "sessions.tests.results_json")
     def _compute_results_html(self):
