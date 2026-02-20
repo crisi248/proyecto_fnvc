@@ -225,10 +225,7 @@ class championship(models.Model):
     )
 
     def get_championship_json(self):
-        """✅ FIXED: JSON completo del campeonato"""
-        import json
         
-        # Si no hay sesiones, devuelve JSON vacío
         if not self.sessions:
             return json.dumps({
                 "mensaje": "Sin sesiones ni resultados. Genera un campeonato aleatorio primero.",
@@ -248,7 +245,6 @@ class championship(models.Model):
             'clasificacion': []
         }
 
-        # ✅ Sesiones → Eventos → Series → Resultados
         for session in self.sessions.sorted('date'):
             session_data = {
                 'nombre': session.name,
@@ -256,30 +252,30 @@ class championship(models.Model):
                 'tests': []
             }
             for test in session.tests:
-                event_data = {
-                    'nombre': test.name,
+                test_data = {
+                    'nombre': test.name or "",
                     'series': []
                 }
-                for sets in test.sets:
+                for set_rec in test.sets:
                     series_data = {
-                        'nombre': set.name,
+                        'nombre': set_rec.name or "",
                         'resultados': []
                     }
-                    for result in sets.results.sorted('time'):
-                        if result.swimmer_id:  # ✅ Verificación
+                    for result in set_rec.results.sorted('time'):
+                        if result.swimmer_id:
                             result_data = {
-                                'nadador': result.swimmer_id.name,
-                                'club': result.swimmer_id.club_id.name or 'Sin club',
-                                'tiempo': f"{result.time//100}.{result.time%100:02d}s",
+                                'nadador': result.swimmer_id.name or "",
+                                'club': result.swimmer_id.club.name if result.swimmer_id.club else "Sin club",
+                                'tiempo': f"{int(result.time)//100}.{int(result.time)%100:02d}s",
                             }
                             series_data['resultados'].append(result_data)
-                    event_data['series'].append(series_data)
-                session_data['eventos'].append(event_data)
+                    test_data['series'].append(series_data)
+                session_data['tests'].append(test_data)
             data['sesiones'].append(session_data)
 
         # ✅ Clasificación FIXED - estructura plana
         results = self.env['natacion.result'].search([
-            ('series_id.event_id.session_id.championship_id', '=', self.id),
+            ('set_id.test_id.session_id.championship_id', '=', self.id),
             ('swimmer_id', '!=', False)
         ])
         best_times = {}
@@ -289,7 +285,7 @@ class championship(models.Model):
             if tid not in best_times or t < best_times[tid]['time']:
                 best_times[tid] = {
                     'nadador': r.swimmer_id.name,
-                    'club': r.swimmer_id.club_id.name or 'Sin club',
+                    'club': r.swimmer_id.club.name or 'Sin club',
                     'mejor_tiempo': f"{t:.2f}s",
                     'time': t  # ✅ Añadido para comparación numérica
                 }
