@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import http
+import json
 
 class Natacion(http.Controller):
 
@@ -16,3 +17,21 @@ class Natacion(http.Controller):
             return f"Campeonato '{name}' no encontrado"
             
         return championship.get_championship_json()
+
+
+    @http.route('/natacion/pagarcuota', auth='public', type='http',cors="*", csrf=False)
+    def apiGet(self, **args):
+        print(args, http.request.httprequest.method)
+        if (http.request.httprequest.method == "POST"):
+            print(http.request.httprequest.data)
+            data = json.loads(http.request.httprequest.data)
+            record = http.request.env["res.partner"].sudo().search([("id", "=",data["id"])])
+            print(record)
+            record.pagar_cuota()
+
+            return http.request.make_json_response(
+                record.read(["name"]),
+                headers=None,
+                cookies=None,
+                status=200)
+                
