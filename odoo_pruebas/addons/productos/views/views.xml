@@ -16,8 +16,18 @@
       <field name="model">productos.destacar_productos</field>
       <field name="arch" type="xml">
         <form string="Destacar productos">
-          <group>
-            <field name="productos_id" string="Productos" />
+          <header>
+            <button name="next" type="object"
+              string="Next"
+              invisible="state in ['destacar']" />
+            <button name="previous" type="object"
+              string="previous" invisible="state in ['seleccionar']"
+            />
+            <field name="state" widget="statusbar" />
+          </header>
+
+          <field name="productos_id" string="Productos" invisible="state in ['destacar']" />
+          <group invisible="state in ['seleccionar']">
             <field name="is_destacado_wizard" string="Está destacado?" />
             <field name="texto_publicitario_wizard" string="Texto Publicitario" />
           </group>
@@ -28,6 +38,7 @@
         </form>
       </field>
     </record>
+
 
     <!--FORMULARIO
     PRODUCTOS-->
