@@ -1,0 +1,81 @@
+<odoo>
+  <data>
+
+    <!--WIZARD-->
+
+    <record id="view_destacar_productos_wizard_action" model="ir.actions.act_window">
+      <field name="name">Destacar productos</field>
+      <field name="res_model">productos.destacar_productos</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+      <field name="binding_model_id" ref="model_product_template" />
+    </record>
+
+    <record id="view_destacar_productos_wizard_form" model="ir.ui.view">
+      <field name="name">destacar productos form</field>
+      <field name="model">productos.destacar_productos</field>
+      <field name="arch" type="xml">
+        <form string="Destacar productos">
+          <group>
+            <field name="productos_id" string="Productos" />
+            <field name="is_destacado_wizard" string="Está destacado?" />
+            <field name="texto_publicitario_wizard" string="Texto Publicitario" />
+          </group>
+          <footer>
+            <button string="Confirmar" type="object" name="destacar_producto" class="btn-primary" />
+            <button string="Cancelar" special="cancel" />
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <!--FORMULARIO
+    PRODUCTOS-->
+
+    <record id="productos.formulario_productos" model="ir.ui.view">
+      <field name="name">Formulario productos</field>
+      <field name="model">product.template</field>
+      <field name="inherit_id" ref="product.product_template_only_form_view" />
+      <field name="arch" type="xml">
+        <notebook position="inside">
+          <page string="More info">
+            <group>
+              <field name="is_destacado" string="Está destacado?" />
+              <field name="texto_publicitario" />
+            </group>
+          </page>
+        </notebook>
+
+
+      </field>
+    </record>
+
+    <!--REPORT-->
+
+    <record id="productos.imprimir_report" model="ir.actions.report">
+      <field name="name">Report Productos</field>
+      <field name="model">product.template</field>
+      <field name="report_type">qweb-pdf</field>
+      <field name="report_name">productos.report_productos_view</field>
+      <field name="report_file">productos.report_productos_view</field>
+      <field name="binding_model_id" ref="model_product_template" />
+      <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_productos_view">
+      <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+          <t t-foreach="docs" t-as="producto">
+
+            <h2 t-field="producto.name" />
+            <img t-attf-src="data:image/*;base64,{{producto.image_128}}"
+              style="max-height:18mm; max-width:50mm;" />
+            <span t-field="producto.texto_publicitario" />
+            <span t-field="producto.list_price" />
+          </t>
+        </t>
+      </t>
+    </template>
+
+  </data>
+</odoo>

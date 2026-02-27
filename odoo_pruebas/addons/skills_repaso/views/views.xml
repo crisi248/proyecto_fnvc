@@ -1,0 +1,60 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="skills_repaso.list">
+      <field name="name">skills_repaso list</field>
+      <field name="model">skills_repaso.skills_repaso</field>
+      <field name="arch" type="xml">
+        <list>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </list>
+      </field>
+    </record>
+-->
+
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="skills_repaso.action_window">
+      <field name="name">skills_repaso window</field>
+      <field name="res_model">skills_repaso.skills_repaso</field>
+      <field name="view_mode">list,form</field>
+    </record>
+-->
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="skills_repaso.action_server">
+      <field name="name">skills_repaso server</field>
+      <field name="model_id" ref="model_skills_repaso_skills_repaso"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "list,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+<!--
+    <menuitem name="skills_repaso" id="skills_repaso.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="skills_repaso.menu_1" parent="skills_repaso.menu_root"/>
+    <menuitem name="Menu 2" id="skills_repaso.menu_2" parent="skills_repaso.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="skills_repaso.menu_1_list" parent="skills_repaso.menu_1"
+              action="skills_repaso.action_window"/>
+    <menuitem name="Server to list" id="skills_repaso" parent="skills_repaso.menu_2"
+              action="skills_repaso.action_server"/>
+-->
+  </data>
+</odoo>
